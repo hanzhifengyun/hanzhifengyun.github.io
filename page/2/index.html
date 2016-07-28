@@ -180,10 +180,10 @@
 
       <div class="body-wrap">
   
-    <article id="post-Home" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-OkHttp" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2016/03/11/Home/" class="article-date">
+      <a href="/2016/03/11/OkHttp/" class="article-date">
   	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
 </a>
     </div>
@@ -197,7 +197,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/11/Home/">Okhttp-wiki 之 Home 主页</a>
+      <a class="article-title" href="/2016/03/11/OkHttp/">Okhttp</a>
     </h1>
   
 
@@ -206,22 +206,49 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Okhttp-wiki-之-Home-主页"><a href="#Okhttp-wiki-之-Home-主页" class="headerlink" title="Okhttp-wiki 之 Home 主页"></a>Okhttp-wiki 之 Home 主页</h1><p>This wiki is your guide to using, and perhaps contributing to OkHttp.</p>
-<p>这个指南教你如何使用它,如果可能的话支持它.</p>
-<p><a href="https://github.com/square/okhttp/wiki" target="_blank" rel="external">Wiki地址</a></p>
-<p><a href="https://github.com/square/okhttp" target="_blank" rel="external">GitHub地址</a></p>
-<p>本着学习okhttp的心思,同时加强一下自己的英语阅读能力,让我们一步步来学习Okhttp的官方wiki吧!</p>
+        <h1 id="Okhttp"><a href="#Okhttp" class="headerlink" title="Okhttp"></a>Okhttp</h1><h2 id="An-HTTP-amp-HTTP-2-client-for-Android-and-Java-applications-用于Android和Java应用程序HTTP和HTTP-2的客户端"><a href="#An-HTTP-amp-HTTP-2-client-for-Android-and-Java-applications-用于Android和Java应用程序HTTP和HTTP-2的客户端" class="headerlink" title="An HTTP &amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端"></a>An HTTP &amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端</h2><h3 id="Overview-描述"><a href="#Overview-描述" class="headerlink" title="Overview 描述"></a>Overview 描述</h3><p>HTTP is the way modern applications network. It’s how we exchange data &amp; media. Doing HTTP efficiently makes your stuff load faster and saves bandwidth.</p>
+<p>HTTP是拉近网络应用程序的方式.这是我们如何交换数据和媒体.使用HTTP有效地使你的东西加载更快,节省带宽.<br>\&lt;!–more–><br>OkHttp is an HTTP client that’s efficient by default:</p>
+<ul>
+<li>HTTP/2 support allows all requests to the same host to share a socket.</li>
+<li>Connection pooling reduces request latency (if HTTP/2 isn’t available).</li>
+<li>Transparent GZIP shrinks download sizes.</li>
+<li>Response caching avoids the network completely for repeat requests.</li>
+</ul>
+<p>OkHttp就是一个有效的HTTP客户端:</p>
+<ul>
+<li>HTTP/2的支持允许所有请求在相同的主机上共享一个socket.</li>
+<li>连接池可以减少请求延迟(如果HTTP/2则不可使用).</li>
+<li>透明的压缩可以减少下载大小.</li>
+<li>响应缓存避免了网络重复完整的请求.</li>
+</ul>
+<p>OkHttp perseveres when the network is troublesome: it will silently recover from common connection problems. If your service has multiple IP addresses OkHttp will attempt alternate addresses if the first connect fails. This is necessary for IPv4+IPv6 and for services hosted in redundant data centers. OkHttp initiates new connections with modern TLS features (SNI, ALPN), and falls back to TLS 1.0 if the handshake fails.</p>
+<p>当网络出现问题时OkHttp会坚守着:它会悄然从常见的连接问题中恢复过来.如果你的服务有多个IP地址,如果第一个连接失败OkHttp将尝试备用地址.对IPv4 + IPv6和服务来说托管在冗余的数据中心是必要的.OkHttp发起最新TLS特性(SNI ALPN)的新连接,如果握手失败则回退至TLS 1.0.</p>
+<p>Using OkHttp is easy. Its request/response API is designed with fluent builders and immutability. It supports both synchronous blocking calls and async calls with callbacks.</p>
+<p>使用OkHttp很容易.它的请求/响应的API设计拥有流畅的建造器和不变性.它同时支持同步阻塞调用和异步回调调用.</p>
+<p>OkHttp supports Android 2.3 and above. For Java, the minimum requirement is 1.7.</p>
+<p>OkHttp支持Android 2.3及以上.对于Java,最低要求是1.7.</p>
 <hr>
 <p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
 <ol>
-<li>Okhttp-wiki 之 Home 主页</li>
+<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
 <li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
 <li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
 <li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
 <li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
 <li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
 </ol>
-
+<h3 id="Download-下载"><a href="#Download-下载" class="headerlink" title="Download 下载"></a>Download 下载</h3><p>Okhttp’s <a href="https://search.maven.org/remote_content?g=com.squareup.okhttp3&amp;a=okhttp&amp;v=LATEST" target="_blank" rel="external">Latest JAR</a></p>
+<p>You’ll also need <a href="http://github.com/square/okio" target="_blank" rel="external">Okio</a>, which OkHttp uses for fast I/O and resizable buffers. Download the <a href="https://search.maven.org/remote_content?g=com.squareup.okio&amp;a=okio&amp;v=LATEST" target="_blank" rel="external">latest JAR</a>.</p>
+<p>你将还需要 <a href="http://github.com/square/okio" target="_blank" rel="external">Okio</a>,OkHttp用来快速I/O和可调整大小的缓冲区.下载<a href="https://search.maven.org/remote_content?g=com.squareup.okio&amp;a=okio&amp;v=LATEST" target="_blank" rel="external">最新的JAR</a>。</p>
+<p>The source code to OkHttp, its samples, and this website is available on <a href="http://github.com/square/okhttp" target="_blank" rel="external">GitHub</a>.</p>
+<p>OkHttp的源代码,其示例,可以在这个网站上看到: <a href="http://github.com/square/okhttp" target="_blank" rel="external">GitHub</a>.</p>
+<h4 id="MAVEN"><a href="#MAVEN" class="headerlink" title="MAVEN"></a>MAVEN</h4><pre><code>&lt;dependency&gt;
+  &lt;groupId&gt;com.squareup.okhttp3&lt;/groupId&gt;
+  &lt;artifactId&gt;okhttp&lt;/artifactId&gt;
+  &lt;version&gt;(insert latest version)&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre><h4 id="GRADLE"><a href="#GRADLE" class="headerlink" title="GRADLE"></a>GRADLE</h4><pre><code>compile &apos;com.squareup.okhttp3:okhttp:(insert latest version)&apos;
+</code></pre>
       
     </div>
     
