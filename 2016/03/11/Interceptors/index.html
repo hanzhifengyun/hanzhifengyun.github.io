@@ -15,7 +15,7 @@
 <meta property="og:description" content="Okhttp-wiki 之 Interceptors 拦截器Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.
 拦截">
 <meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1504154-8daf5fd9540545d3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2016-07-28T07:28:41.000Z">
+<meta property="og:updated_time" content="2016-07-28T10:11:37.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Okhttp-wiki 之 Interceptors 拦截器">
 <meta name="twitter:description" content="Okhttp-wiki 之 Interceptors 拦截器Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.
@@ -226,7 +226,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h1 id="Okhttp-wiki-之-Interceptors-拦截器"><a href="#Okhttp-wiki-之-Interceptors-拦截器" class="headerlink" title="Okhttp-wiki 之 Interceptors 拦截器"></a>Okhttp-wiki 之 Interceptors 拦截器</h1><p>Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.</p>
-<p>拦截器是一种强大的机制,可以监视、重写和重试调用.下面是一个简单例子,拦截发出的请求和传入的响应的日志.</p>
+<p>拦截器是一种强大的机制,可以监视、重写和重试调用.下面是一个简单例子,拦截发出的请求和传入的响应的日志.<br><a id="more"></a></p>
 <pre><code>class LoggingInterceptor implements Interceptor {
   @Override public Response intercept(Interceptor.Chain chain) throws IOException {
     Request request = chain.request();
@@ -402,12 +402,12 @@ private static final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = new Interce
 <hr>
 <p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
 <ol>
-<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
-<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
-<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
-<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Home/" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Calls/" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Connections/" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Recipes/" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
 <li>Okhttp-wiki 之 Interceptors 拦截器</li>
-<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/HTTPS/" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
 </ol>
 
       
@@ -418,18 +418,18 @@ private static final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = new Interce
     
 <nav id="article-nav">
   
-    <a href="/2016/03/11/Recipes/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2016/03/11/OkHttp/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption"><</strong>
       <div class="article-nav-title">
         
-          Okhttp-wiki 之 Recipes 秘诀(食谱)
+          Okhttp
         
       </div>
     </a>
   
   
-    <a href="/2016/03/11/HTTPS/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Okhttp-wiki 之 HTTPS</div>
+    <a href="/2016/03/11/Connections/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Okhttp-wiki 之 Connections 连接</div>
       <strong class="article-nav-caption">></strong>
     </a>
   

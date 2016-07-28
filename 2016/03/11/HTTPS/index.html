@@ -16,7 +16,7 @@ Connectivity to as many hosts as possible. That includes advanced hosts that run
 <meta property="og:description" content="Okhttp-wiki 之 HTTPSOkHttp attempts to balance two competing concerns:
 
 Connectivity to as many hosts as possible. That includes advanced hosts that run the latest versions of boringssl and less out of">
-<meta property="og:updated_time" content="2016-07-28T10:02:56.000Z">
+<meta property="og:updated_time" content="2016-07-28T10:11:01.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Okhttp-wiki 之 HTTPS">
 <meta name="twitter:description" content="Okhttp-wiki 之 HTTPSOkHttp attempts to balance two competing concerns:
@@ -234,9 +234,9 @@ Connectivity to as many hosts as possible. That includes advanced hosts that run
 <p>OkHttp试图平衡下面两者之间的矛盾关系:</p>
 <ul>
 <li>尽可能多的主机连接.这包括运行最新版本先进的<a href="https://boringssl.googlesource.com/boringssl/" target="_blank" rel="external">boringssl</a>主机和运行旧版本过时的<a href="https://www.openssl.org/" target="_blank" rel="external">OpenSSL</a>主机.</li>
-<li>连接安全.这包括远程网络服务器证书的验证和用很强的密码交换数据的隐私.</li>
+<li>连接安全.这包括远程网络服务器证书的验证和用很强的密码交换数据的隐私.<a id="more"></a>
+When negotiating a connection to an HTTPS server, OkHttp needs to know which <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/TlsVersion.html" target="_blank" rel="external">TLS versions</a> and <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CipherSuite.html" target="_blank" rel="external">cipher suites</a> to offer. A client that wants to maximize connectivity would include obsolete TLS versions and weak-by-design cipher suites. A strict client that wants to maximize security would be limited to only the latest TLS version and strongest cipher suites.</li>
 </ul>
-<p>When negotiating a connection to an HTTPS server, OkHttp needs to know which <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/TlsVersion.html" target="_blank" rel="external">TLS versions</a> and <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CipherSuite.html" target="_blank" rel="external">cipher suites</a> to offer. A client that wants to maximize connectivity would include obsolete TLS versions and weak-by-design cipher suites. A strict client that wants to maximize security would be limited to only the latest TLS version and strongest cipher suites.</p>
 <p>当判断一个连接到HTTPS服务器的连接,OkHttp需要知道是哪个TLS版本和提供的密码组合.客户端想要最大化连接将包括过时的TLS版本和很弱的密码套件.一个严谨的客户希望最大化安全将仅限于最新的TLS版本和最强的密码组合.</p>
 <p>Specific security vs. connectivity decisions are implemented by <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionSpec.html" target="_blank" rel="external">ConnectionSpec</a>. OkHttp includes three built-in connection specs:</p>
 <ul>
@@ -325,11 +325,11 @@ public SSLContext sslContextForTrustedCertificates(InputStream in) {
 </code></pre><hr>
 <p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
 <ol>
-<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
-<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
-<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
-<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
-<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Home/" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Calls/" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Connections/" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Recipes/" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Interceptors/" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
 <li>Okhttp-wiki 之 HTTPS</li>
 </ol>
 
@@ -341,18 +341,18 @@ public SSLContext sslContextForTrustedCertificates(InputStream in) {
     
 <nav id="article-nav">
   
-    <a href="/2016/03/11/Interceptors/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2016/03/11/Calls/" id="article-nav-newer" class="article-nav-link-wrap">
       <strong class="article-nav-caption"><</strong>
       <div class="article-nav-title">
         
-          Okhttp-wiki 之 Interceptors 拦截器
+          Okhttp-wiki 之 Calls 调用
         
       </div>
     </a>
   
   
-    <a href="/2016/03/11/OkHttp/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">Okhttp</div>
+    <a href="/2016/03/11/Recipes/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Okhttp-wiki 之 Recipes 秘诀(食谱)</div>
       <strong class="article-nav-caption">></strong>
     </a>
   

@@ -375,896 +375,6 @@
 
 
   
-    <article id="post-Recipes" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/03/11/Recipes/" class="article-date">
-  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/11/Recipes/">Okhttp-wiki 之 Recipes 秘诀(食谱)</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Okhttp-wiki-之-Recipes-秘诀-食谱"><a href="#Okhttp-wiki-之-Recipes-秘诀-食谱" class="headerlink" title="Okhttp-wiki 之 Recipes 秘诀(食谱)"></a>Okhttp-wiki 之 Recipes 秘诀(食谱)</h1><p>We’ve written some recipes that demonstrate how to solve common problems with OkHttp. Read through them to learn about how everything works together. Cut-and-paste these examples freely; that’s what they’re for.</p>
-<p>我们写了一些秘诀来演示OkHttp如何解决常见问题。通读他们了解在一起做的任何事情。你可以自由复制粘贴这些例子;这就是他们的目的。</p>
-<h2 id="Synchronous-同步的-Get"><a href="#Synchronous-同步的-Get" class="headerlink" title="Synchronous (同步的) Get"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/SynchronousGet.java" target="_blank" rel="external">Synchronous (同步的) Get</a></h2><p>Download a file, print its headers, and print its response body as a string.</p>
-<p>下载一个文件,打印头信息,打印其响应实体为字符串。</p>
-<p>The <code>string()</code> method on response body is convenient and efficient for small documents. But if the response body is large (greater than 1 MiB), avoid <code>string()</code> because it will load the entire document into memory. In that case, prefer to process the body as a stream.</p>
-<p>对小文件来说<code>string()</code>方法响应实体是方便和高效的.但如果响应实体很大(大于1 MiB),避免使用<code>string()</code>,因为它会将整个文档加载到内存中.在这种情况下,更倾向于用流处理实体.</p>
-<pre><code>private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;http://publicobject.com/helloworld.txt&quot;)
-      .build();
-
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  Headers responseHeaders = response.headers();
-  for (int i = 0; i &lt; responseHeaders.size(); i++) {
-    System.out.println(responseHeaders.name(i) + &quot;: &quot; + responseHeaders.value(i));
-  }
-
-  System.out.println(response.body().string());
-}
-</code></pre><h2 id="Asynchronous-异步的-Get"><a href="#Asynchronous-异步的-Get" class="headerlink" title="Asynchronous (异步的) Get"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/AsynchronousGet.java" target="_blank" rel="external">Asynchronous (异步的) Get</a></h2><p>Download a file on a worker thread, and get called back when the response is readable. The callback is made after the response headers are ready. Reading the response body may still block. OkHttp doesn’t currently offer asynchronous APIs to receive a response body in parts.</p>
-<p>在工作线程下载一个文件,在响应可读时获得回调.回调被创建意味着响应头信息准备好了。读取响应主体可能阻塞线程。OkHttp当前不具备异步api来获得响应的实体部分。</p>
-<pre><code>private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;http://publicobject.com/helloworld.txt&quot;)
-      .build();
-
-  client.newCall(request).enqueue(new Callback() {
-    @Override public void onFailure(Request request, IOException throwable) {
-      throwable.printStackTrace();
-    }
-
-    @Override public void onResponse(Response response) throws IOException {
-      if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-      Headers responseHeaders = response.headers();
-      for (int i = 0; i &lt; responseHeaders.size(); i++) {
-        System.out.println(responseHeaders.name(i) + &quot;: &quot; + responseHeaders.value(i));
-      }
-
-      System.out.println(response.body().string());
-    }
-  });
-}
-</code></pre><h2 id="Accessing-Headers-访问头信息"><a href="#Accessing-Headers-访问头信息" class="headerlink" title="Accessing Headers 访问头信息"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/AccessHeaders.java" target="_blank" rel="external">Accessing Headers 访问头信息</a></h2><p>Typically HTTP headers work like a <code>Map&lt;String, String&gt;</code>: each field has one value or none. But some headers permit multiple values, like Guava’s <a href="http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/collect/Multimap.html" target="_blank" rel="external">Multimap</a>. For example, it’s legal and common for an HTTP response to supply multiple <code>Vary</code> headers. OkHttp’s APIs attempt to make both cases comfortable.</p>
-<p>典型的HTTP头信息的工作像一个<code>Map&lt;String, String&gt;</code>:每个字段都有一个值或没有.但是一些头信息允许多个值,如 Guava’s <a href="http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/collect/Multimap.html" target="_blank" rel="external">Multimap</a>.例如,一个HTTP响应提供多个不同的头信息是合法和常见的.OkHttp’s APIs试图使这两种情况下都方便使用.</p>
-<p>When writing request headers, use <code>header(name, value)</code> to set the only occurrence of <code>name</code> to <code>value</code>. If there are existing values, they will be removed before the new value is added. Use <code>addHeader(name, value)</code> to add a header without removing the headers already present.</p>
-<p>当写请求头信息时,使用<code>header(name, value)</code>为<code>value</code>设置唯一的<code>name</code>.如果values已经存在,他们将被删除然后添加的新<code>value</code>.使用<code>addHeader(name, value)</code>来添加一个新的头信息而不需要移除已经存在的头信息.</p>
-<p>When reading response a header, use <code>header(name)</code> to return the last occurrence of the named value. Usually this is also the only occurrence! If no value is present, <code>header(name)</code> will return null. To read all of a field’s values as a list, use <code>headers(name)</code>.</p>
-<p>当读响应头信息时,使用<code>header(name)</code>返回最后出现的命名值。通常这也是唯一事件!如果没有<code>value</code>存在,<code>header(name)</code>将返回<code>null</code>.阅读所有字段的值列表,使用<code>headers(name)</code>.</p>
-<p>To visit all headers, use the <code>Headers</code> class which supports access by index.</p>
-<p>访问所有的头信息,使用<code>Headers</code>类支持通过索引访问.</p>
-<pre><code>private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;https://api.github.com/repos/square/okhttp/issues&quot;)
-      .header(&quot;User-Agent&quot;, &quot;OkHttp Headers.java&quot;)
-      .addHeader(&quot;Accept&quot;, &quot;application/json; q=0.5&quot;)
-      .addHeader(&quot;Accept&quot;, &quot;application/vnd.github.v3+json&quot;)
-      .build();
-
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  System.out.println(&quot;Server: &quot; + response.header(&quot;Server&quot;));
-  System.out.println(&quot;Date: &quot; + response.header(&quot;Date&quot;));
-  System.out.println(&quot;Vary: &quot; + response.headers(&quot;Vary&quot;));
-}
-</code></pre><h2 id="Posting-a-String-上传字符串"><a href="#Posting-a-String-上传字符串" class="headerlink" title="Posting a String 上传字符串"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostString.java" target="_blank" rel="external">Posting a String 上传字符串</a></h2><p>Use an HTTP POST to send a request body to a service. This example posts a markdown document to a web service that renders markdown as HTML. Because the entire request body is in memory simultaneously, avoid posting large (greater than 1 MiB) documents using this API.</p>
-<p>使用一个HTTP POST发送请求实体到服务.这个例子提交一个markdown文档发送给web服务,将markdown呈现为HTML.因为整个请求实体同时在内存中,避免使用这个API发布大文档(大于1 MiB).</p>
-<pre><code>public static final MediaType MEDIA_TYPE_MARKDOWN
-    = MediaType.parse(&quot;text/x-markdown; charset=utf-8&quot;);
-
-private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  String postBody = &quot;&quot;
-      + &quot;Releases\n&quot;
-      + &quot;--------\n&quot;
-      + &quot;\n&quot;
-      + &quot; * _1.0_ May 6, 2013\n&quot;
-      + &quot; * _1.1_ June 15, 2013\n&quot;
-      + &quot; * _1.2_ August 11, 2013\n&quot;;
-
-  Request request = new Request.Builder()
-      .url(&quot;https://api.github.com/markdown/raw&quot;)
-      .post(RequestBody.create(MEDIA_TYPE_MARKDOWN, postBody))
-      .build();
-
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  System.out.println(response.body().string());
-}
-</code></pre><h2 id="Post-Streaming-上传流"><a href="#Post-Streaming-上传流" class="headerlink" title="Post Streaming 上传流"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostStreaming.java" target="_blank" rel="external">Post Streaming 上传流</a></h2><p>Here we <code>POST</code> a request body as a stream. The content of this request body is being generated as it’s being written. This example streams directly into the <a href="https://github.com/square/okio" target="_blank" rel="external">Okio</a> buffered sink. Your programs may prefer an OutputStream, which you can get from BufferedSink.outputStream().</p>
-<p>这里我们发布一个请求实体作为一个流. 这个请求实体被写的时候它的内容就产生了.这个例子的流直接进入到 <a href="https://github.com/square/okio" target="_blank" rel="external">Okio</a> 缓冲池.你的项目可能更喜欢一个<code>OutputStream</code>,你可以从<code>BufferedSink.outputStream()</code>获取.</p>
-<pre><code>public static final MediaType MEDIA_TYPE_MARKDOWN
-    = MediaType.parse(&quot;text/x-markdown; charset=utf-8&quot;);
-
-private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  RequestBody requestBody = new RequestBody() {
-    @Override public MediaType contentType() {
-      return MEDIA_TYPE_MARKDOWN;
-    }
-
-    @Override public void writeTo(BufferedSink sink) throws IOException {
-      sink.writeUtf8(&quot;Numbers\n&quot;);
-      sink.writeUtf8(&quot;-------\n&quot;);
-      for (int i = 2; i &lt;= 997; i++) {
-        sink.writeUtf8(String.format(&quot; * %s = %s\n&quot;, i, factor(i)));
-      }
-    }
-
-    private String factor(int n) {
-      for (int i = 2; i &lt; n; i++) {
-        int x = n / i;
-        if (x * i == n) return factor(x) + &quot; × &quot; + i;
-      }
-      return Integer.toString(n);
-    }
-  };
-
-  Request request = new Request.Builder()
-      .url(&quot;https://api.github.com/markdown/raw&quot;)
-      .post(requestBody)
-      .build();
-
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  System.out.println(response.body().string());
-}
-</code></pre><h2 id="Posting-a-File-上传文件"><a href="#Posting-a-File-上传文件" class="headerlink" title="Posting a File 上传文件"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostFile.java" target="_blank" rel="external">Posting a File 上传文件</a></h2><p>It’s easy to use a file as a request body.</p>
-<p>很容易使用一个文件作为请求实体.</p>
-<pre><code>public static final MediaType MEDIA_TYPE_MARKDOWN
-    = MediaType.parse(&quot;text/x-markdown; charset=utf-8&quot;);
-
-private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  File file = new File(&quot;README.md&quot;);
-
-  Request request = new Request.Builder()
-      .url(&quot;https://api.github.com/markdown/raw&quot;)
-      .post(RequestBody.create(MEDIA_TYPE_MARKDOWN, file))
-      .build();
-
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  System.out.println(response.body().string());
-}
-</code></pre><h2 id="Posting-form-parameters-上传表格参数"><a href="#Posting-form-parameters-上传表格参数" class="headerlink" title="Posting form parameters 上传表格参数"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostForm.java" target="_blank" rel="external">Posting form parameters 上传表格参数</a></h2><p>Use <code>FormBody.Builder</code> to build a request body that works like an HTML <code>&lt;form&gt;</code> tag. Names and values will be encoded using an HTML-compatible form URL encoding.</p>
-<p>使用<code>FormBody.Builder</code>构建请求实体工作起来就像一个HTML<code>&lt;form&gt;</code> 标签。名称和值将使用一种 HTML-compatible 的URL编码。</p>
-<pre><code>private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  RequestBody formBody = new FormBody.Builder()
-      .add(&quot;search&quot;, &quot;Jurassic Park&quot;)
-      .build();
-  Request request = new Request.Builder()
-      .url(&quot;https://en.wikipedia.org/w/index.php&quot;)
-      .post(formBody)
-      .build();
-
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  System.out.println(response.body().string());
-}
-</code></pre><h2 id="Posting-a-multipart-request-上传多部分的请求"><a href="#Posting-a-multipart-request-上传多部分的请求" class="headerlink" title="Posting a multipart request 上传多部分的请求"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostMultipart.java" target="_blank" rel="external">Posting a multipart request 上传多部分的请求</a></h2><p><code>MultipartBody.Builder</code> can build sophisticated request bodies compatible with HTML file upload forms. Each part of a multipart request body is itself a request body, and can define its own headers. If present, these headers should describe the part body, such as its <code>Content-Disposition</code>. The <code>Content-Length</code> and <code>Content-Type</code> headers are added automatically if they’re available.</p>
-<p><code>MultipartBody.Builder</code> 可以构建兼容HTML文件上传表单的复杂的请求实体。一个多部分请求的每个部分本身就是一个请求实体,并可以定义自己的头信息。如果存在的话,这些头信息应该描述该部分实体,比如它的内容目录.内容长度和内容类型的头信息如果可用的话会自动添加。</p>
-<pre><code>private static final String IMGUR_CLIENT_ID = &quot;...&quot;;
-private static final MediaType MEDIA_TYPE_PNG = MediaType.parse(&quot;image/png&quot;);
-
-private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  // Use the imgur image upload API as documented at https://api.imgur.com/endpoints/image
-  RequestBody requestBody = new MultipartBody.Builder()
-      .setType(MultipartBody.FORM)
-      .addFormDataPart(&quot;title&quot;, &quot;Square Logo&quot;)
-      .addFormDataPart(&quot;image&quot;, &quot;logo-square.png&quot;,
-          RequestBody.create(MEDIA_TYPE_PNG, new File(&quot;website/static/logo-square.png&quot;)))
-      .build();
-
-  Request request = new Request.Builder()
-      .header(&quot;Authorization&quot;, &quot;Client-ID &quot; + IMGUR_CLIENT_ID)
-      .url(&quot;https://api.imgur.com/3/image&quot;)
-      .post(requestBody)
-      .build();
-
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  System.out.println(response.body().string());
-}
-</code></pre><h2 id="Parse-a-JSON-Response-With-Gson-用Gson解析一个JSON响应"><a href="#Parse-a-JSON-Response-With-Gson-用Gson解析一个JSON响应" class="headerlink" title="Parse a JSON Response With Gson 用Gson解析一个JSON响应"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/ParseResponseWithGson.java" target="_blank" rel="external">Parse a JSON Response With Gson 用Gson解析一个JSON响应</a></h2><p><a href="http://code.google.com/p/google-gson/" target="_blank" rel="external">Gson</a> is a handy API for converting between JSON and Java objects. Here we’re using it to decode a JSON response from a GitHub API.</p>
-<p><a href="http://code.google.com/p/google-gson/" target="_blank" rel="external">Gson</a> 是一个方便JSON和Java对象之间互相转换的API.这里我们用它来解析一个来自GitHub API的JSON响应.</p>
-<p>Note that <code>ResponseBody.charStream()</code> uses the <code>Content-Type</code> response header to select which charset to use when decoding the response body. It defaults to <code>UTF-8</code> if no charset is specified.</p>
-<p>注意: 当解析响应实体时 <code>ResponseBody.charStream()</code> 使用 <code>Content-Type</code> 响应头信息来选择字符编码.如果没有指定字符编码则默认为<code>UTF-8</code>.</p>
-<pre><code>private final OkHttpClient client = new OkHttpClient();
-private final Gson gson = new Gson();
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;https://api.github.com/gists/c2a7c39532239ff261be&quot;)
-      .build();
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  Gist gist = gson.fromJson(response.body().charStream(), Gist.class);
-  for (Map.Entry&lt;String, GistFile&gt; entry : gist.files.entrySet()) {
-    System.out.println(entry.getKey());
-    System.out.println(entry.getValue().content);
-  }
-}
-
-static class Gist {
-  Map&lt;String, GistFile&gt; files;
-}
-
-static class GistFile {
-  String content;
-}
-</code></pre><h2 id="Response-Caching-响应缓存"><a href="#Response-Caching-响应缓存" class="headerlink" title="Response Caching 响应缓存"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CacheResponse.java" target="_blank" rel="external">Response Caching 响应缓存</a></h2><p>To cache responses, you’ll need a cache directory that you can read and write to, and a limit on the cache’s size. The cache directory should be private, and untrusted applications should not be able to read its contents!</p>
-<p>为了缓存响应,你需要一个缓存目录,你可以读和写,并限制缓存的大小.缓存目录应该是私有的,不受信任的应用程序不应该能够阅读其内容!</p>
-<p>It is an error to have multiple caches accessing the same cache directory simultaneously. Most applications should call <code>new OkHttpClient()</code> exactly once, configure it with their cache, and use that same instance everywhere. Otherwise the two cache instances will stomp on each other, corrupt the response cache, and possibly crash your program.</p>
-<p>同时有多个缓存访问相同的缓存目录是错误的.大多数应用程序应该只调用 <code>new OkHttpClient()</code> 一次, 配置它们的缓存,并在所有地方使用相同的OkHttpClient实例.否则这两个缓存实例会互相干扰,恶化响应缓存,并可能使程序崩溃.</p>
-<p>Response caching uses HTTP headers for all configuration. You can add request headers like <code>Cache-Control: max-stale=3600</code> and OkHttp’s cache will honor them. Your webserver configures how long responses are cached with its own response headers, like <code>Cache-Control: max-age=9600</code>. There are cache headers to force a cached response, force a network response, or force the network response to be validated with a conditional GET.</p>
-<p>响应缓存为所有配置使用HTTP头信息. 你可以添加请求头信息如 <code>Cache-Control: max-stale=3600</code> 同时OkHttp缓存会使用他们。你的网络服务器配置响应能缓存多久自己的响应头信息,像 <code>Cache-Control: max-age=9600</code>。缓存头信息促使一个缓存的响应,促使一个网络响应,或当一个条件得到验证时促使网络响应。</p>
-<pre><code>private final OkHttpClient client;
-
-public CacheResponse(File cacheDirectory) throws Exception {
-  int cacheSize = 10 * 1024 * 1024; // 10 MiB
-  Cache cache = new Cache(cacheDirectory, cacheSize);
-
-  client = new OkHttpClient.Builder()
-      .cache(cache)
-      .build();
-}
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;http://publicobject.com/helloworld.txt&quot;)
-      .build();
-
-  Response response1 = client.newCall(request).execute();
-  if (!response1.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response1);
-
-  String response1Body = response1.body().string();
-  System.out.println(&quot;Response 1 response:          &quot; + response1);
-  System.out.println(&quot;Response 1 cache response:    &quot; + response1.cacheResponse());
-  System.out.println(&quot;Response 1 network response:  &quot; + response1.networkResponse());
-
-  Response response2 = client.newCall(request).execute();
-  if (!response2.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response2);
-
-  String response2Body = response2.body().string();
-  System.out.println(&quot;Response 2 response:          &quot; + response2);
-  System.out.println(&quot;Response 2 cache response:    &quot; + response2.cacheResponse());
-  System.out.println(&quot;Response 2 network response:  &quot; + response2.networkResponse());
-
-  System.out.println(&quot;Response 2 equals Response 1? &quot; + response1Body.equals(response2Body));
-}
-</code></pre><p>To prevent a response from using the cache, use <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_NETWORK" target="_blank" rel="external"><code>CacheControl.FORCE_NETWORK</code></a>. To prevent it from using the network, use <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_CACHE" target="_blank" rel="external"><code>CacheControl.FORCE_CACHE</code></a>. Be warned: if you use <code>FORCE_CACHE</code> and the response requires the network, OkHttp will return a <code>504 Unsatisfiable Request</code> response.</p>
-<p>防止一个响应使用缓存,只获取网络响应,使用<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_NETWORK" target="_blank" rel="external"><code>CacheControl.FORCE_NETWORK</code></a>.防止一个响应使用网络,只使用缓存,使用<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_CACHE" target="_blank" rel="external"><code>CacheControl.FORCE_CACHE</code></a>.警告:如果你使用<code>FORCE_CACHE</code>和响应需要网络,OkHttp将返回一个504不可满足的请求响应.</p>
-<h2 id="Canceling-a-Call-取消一个调用"><a href="#Canceling-a-Call-取消一个调用" class="headerlink" title="Canceling a Call 取消一个调用"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CancelCall.java" target="_blank" rel="external">Canceling a Call 取消一个调用</a></h2><p>Use <code>Call.cancel()</code> to stop an ongoing call immediately. If a thread is currently writing a request or reading a response, it will receive an <code>IOException</code>. Use this to conserve the network when a call is no longer necessary; for example when your user navigates away from an application. Both synchronous and asynchronous calls can be canceled.</p>
-<p>使用 <code>Call.cancel()</code> 立即停止一个正在进行中的调用.如果一个线程正在写一个请求或读一个响应,它将接收一个 <code>IOException</code>.当调用不再是必要的时候使用这种方式保护网络;例如当你的用户导航离开应用程序的时候,同步和异步调用就可以取消。</p>
-<pre><code>private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;http://httpbin.org/delay/2&quot;) // This URL is served with a 2 second delay.
-      .build();
-
-  final long startNanos = System.nanoTime();
-  final Call call = client.newCall(request);
-
-  // Schedule a job to cancel the call in 1 second.
-  executor.schedule(new Runnable() {
-    @Override public void run() {
-      System.out.printf(&quot;%.2f Canceling call.%n&quot;, (System.nanoTime() - startNanos) / 1e9f);
-      call.cancel();
-      System.out.printf(&quot;%.2f Canceled call.%n&quot;, (System.nanoTime() - startNanos) / 1e9f);
-    }
-  }, 1, TimeUnit.SECONDS);
-
-  try {
-    System.out.printf(&quot;%.2f Executing call.%n&quot;, (System.nanoTime() - startNanos) / 1e9f);
-    Response response = call.execute();
-    System.out.printf(&quot;%.2f Call was expected to fail, but completed: %s%n&quot;,
-        (System.nanoTime() - startNanos) / 1e9f, response);
-  } catch (IOException e) {
-    System.out.printf(&quot;%.2f Call failed as expected: %s%n&quot;,
-        (System.nanoTime() - startNanos) / 1e9f, e);
-  }
-}
-</code></pre><h2 id="Timeouts-超时"><a href="#Timeouts-超时" class="headerlink" title="Timeouts 超时"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/ConfigureTimeouts.java" target="_blank" rel="external">Timeouts 超时</a></h2><p>Use timeouts to fail a call when its peer is unreachable. Network partitions can be due to client connectivity problems, server availability problems, or anything between. OkHttp supports connect, read, and write timeouts.</p>
-<p>当访问遥不可及时,使用超时来使调用失败.网络分区可能由于客户机连通性问题,服务器的可用性问题,或任何两者之间的问题.OkHttp支持连接,读和写的超时设置.</p>
-<pre><code>private final OkHttpClient client;
-
-public ConfigureTimeouts() throws Exception {
-  client = new OkHttpClient.Builder()
-      .connectTimeout(10, TimeUnit.SECONDS)
-      .writeTimeout(10, TimeUnit.SECONDS)
-      .readTimeout(30, TimeUnit.SECONDS)
-      .build();
-}
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;http://httpbin.org/delay/2&quot;) // This URL is served with a 2 second delay.
-      .build();
-
-  Response response = client.newCall(request).execute();
-  System.out.println(&quot;Response completed: &quot; + response);
-}
-</code></pre><h2 id="Per-call-Configuration-每个调用的设置"><a href="#Per-call-Configuration-每个调用的设置" class="headerlink" title="Per-call Configuration 每个调用的设置"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PerCallSettings.java" target="_blank" rel="external">Per-call Configuration 每个调用的设置</a></h2><p>All the HTTP client configuration lives in <code>OkHttpClient</code> including proxy settings, timeouts, and caches. When you need to change the configuration of a single call, call <code>OkHttpClient.newBuilder()</code>. This returns a builder that shares the same connection pool, dispatcher, and configuration with the original client. In the example below, we make one request with a 500 ms timeout and another with a 3000 ms timeout.</p>
-<p>所有的HTTP客户端配置在OkHttpClient中,包括代理设置,超时和缓存.当你需要为单个调用改变配置的时候,调用<code>OkHttpClient.newBuilder()</code>.这返回一个builder,分享同样的连接池,分配器和原始OkHttpClient的配置.在下面的示例中,我们让一个请求500ms 超时,另一个请求3000 ms超时.</p>
-<pre><code>private final OkHttpClient client = new OkHttpClient();
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;http://httpbin.org/delay/1&quot;) // This URL is served with a 1 second delay.
-      .build();
-
-  try {
-    // Copy to customize OkHttp for this request.
-    OkHttpClient copy = client.newBuilder()
-        .readTimeout(500, TimeUnit.MILLISECONDS)
-        .build();
-
-    Response response = copy.newCall(request).execute();
-    System.out.println(&quot;Response 1 succeeded: &quot; + response);
-  } catch (IOException e) {
-    System.out.println(&quot;Response 1 failed: &quot; + e);
-  }
-
-  try {
-    // Copy to customize OkHttp for this request.
-    OkHttpClient copy = client.newBuilder()
-        .readTimeout(3000, TimeUnit.MILLISECONDS)
-        .build();
-
-    Response response = copy.newCall(request).execute();
-    System.out.println(&quot;Response 2 succeeded: &quot; + response);
-  } catch (IOException e) {
-    System.out.println(&quot;Response 2 failed: &quot; + e);
-  }
-}
-</code></pre><h2 id="Handling-authentication-处理身份验证"><a href="#Handling-authentication-处理身份验证" class="headerlink" title="Handling authentication 处理身份验证"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/Authenticate.java" target="_blank" rel="external">Handling authentication 处理身份验证</a></h2><p>OkHttp can automatically retry unauthenticated requests. When a response is <code>401 Not Authorized</code>, an <code>Authenticator</code> is asked to supply credentials. Implementations should build a new request that includes the missing credentials. If no credentials are available, return null to skip the retry.</p>
-<p>OkHttp可以自动重试未经身份验证的请求.当响应401未授权, 一个<code>Authenticator</code>被访问来提供证书.实现为建立一个新的请求,包含缺失的凭证.如果没有证书可用,返回null来跳过重试.</p>
-<p>Use <code>Response.challenges()</code> to get the schemes and realms of any authentication challenges. When fulfilling a <code>Basic</code> challenge, use <code>Credentials.basic(username, password)</code> to encode the request header.</p>
-<p>使用 <code>Response.challenges()</code> 来获得任何身份验证的方案和领域的挑战。当完成一个基本的挑战,使用 <code>Credentials.basic(username, password)</code> 来编码请求头信息。</p>
-<pre><code>private final OkHttpClient client;
-
-public Authenticate() {
-  client = new OkHttpClient.Builder()
-      .authenticator(new Authenticator() {
-        @Override public Request authenticate(Route route, Response response) throws IOException {
-          System.out.println(&quot;Authenticating for response: &quot; + response);
-          System.out.println(&quot;Challenges: &quot; + response.challenges());
-          String credential = Credentials.basic(&quot;jesse&quot;, &quot;password1&quot;);
-          return response.request().newBuilder()
-              .header(&quot;Authorization&quot;, credential)
-              .build();
-        }
-      })
-      .build();
-}
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;http://publicobject.com/secrets/hellosecret.txt&quot;)
-      .build();
-
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  System.out.println(response.body().string());
-}
-</code></pre><p>To avoid making many retries when authentication isn’t working, you can return null to give up. For example, you may want to skip the retry when these exact credentials have already been attempted:</p>
-<p>为避免当验证不工作而导致许多重试,你可以返回null放弃.例如,当这些确切的证书已经尝试访问过时你可能想跳过重试:</p>
-<pre><code>if (credential.equals(response.request().header(&quot;Authorization&quot;))) {
-  return null; // If we already failed with these credentials, don&apos;t retry.
- }
-</code></pre><p>You may also skip the retry when you’ve hit an application-defined attempt limit:</p>
-<p>当你设置一个应用程序定义的限制时你也可以跳过重试:</p>
-<pre><code>if (responseCount(response) &gt;= 3) {
-  return null; // If we&apos;ve failed 3 times, give up.
-}
-</code></pre><p>This above code relies on this <code>responseCount()</code> method:</p>
-<p>这上面的代码依赖于 <code>responseCount()</code> 方法:</p>
-<pre><code>private int responseCount(Response response) {
-  int result = 1;
-  while ((response = response.priorResponse()) != null) {
-    result++;
-  }
-  return result;
-}
-</code></pre><hr>
-<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
-<ol>
-<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
-<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
-<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
-<li>Okhttp-wiki 之 Recipes 秘诀(食谱)</li>
-<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
-<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
-</ol>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Interceptors" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/03/11/Interceptors/" class="article-date">
-  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/11/Interceptors/">Okhttp-wiki 之 Interceptors 拦截器</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Okhttp-wiki-之-Interceptors-拦截器"><a href="#Okhttp-wiki-之-Interceptors-拦截器" class="headerlink" title="Okhttp-wiki 之 Interceptors 拦截器"></a>Okhttp-wiki 之 Interceptors 拦截器</h1><p>Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.</p>
-<p>拦截器是一种强大的机制,可以监视、重写和重试调用.下面是一个简单例子,拦截发出的请求和传入的响应的日志.</p>
-<pre><code>class LoggingInterceptor implements Interceptor {
-  @Override public Response intercept(Interceptor.Chain chain) throws IOException {
-    Request request = chain.request();
-
-    long t1 = System.nanoTime();
-    logger.info(String.format(&quot;Sending request %s on %s%n%s&quot;,
-        request.url(), chain.connection(), request.headers()));
-
-    Response response = chain.proceed(request);
-
-    long t2 = System.nanoTime();
-    logger.info(String.format(&quot;Received response for %s in %.1fms%n%s&quot;,
-        response.request().url(), (t2 - t1) / 1e6d, response.headers()));
-
-    return response;
-  }
-}
-</code></pre><p>A call to <code>chain.proceed(request)</code> is a critical part of each interceptor’s implementation. This simple-looking method is where all the HTTP work happens, producing a response to satisfy the request.</p>
-<p>调用 <code>chain.proceed(request)</code> 是每个拦截器的关键部分的实现.这个简单的方法存在所有HTTP工作发生的地方,生产满足请求的响应.</p>
-<p>Interceptors can be chained. Suppose you have both a compressing interceptor and a checksumming interceptor: you’ll need to decide whether data is compressed and then checksummed, or checksummed and then compressed. OkHttp uses lists to track interceptors, and interceptors are called in order.</p>
-<p>拦截器可以多个链接.假设您有一个压缩拦截器和校验拦截器:你需要决定数据是先压缩然后校验,还是先校验后压缩.OkHttp使用列表追踪拦截器,拦截器按顺序被调用。</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/1504154-8daf5fd9540545d3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
-<h2 id="Application-Interceptors-应用拦截器"><a href="#Application-Interceptors-应用拦截器" class="headerlink" title="Application Interceptors 应用拦截器"></a>Application Interceptors 应用拦截器</h2><p>Interceptors are registered as either application or network interceptors. We’ll use the <code>LoggingInterceptor</code> defined above to show the difference.</p>
-<p>拦截器可以被应用程序或网络注册,我们将使用上面定义的 <code>LoggingInterceptor</code> 显示两者之间的差异.</p>
-<p>Register an application interceptor by calling <code>addInterceptor()</code> on:</p>
-<p>注册一个应用拦截器通过 <code>OkHttpClient.Builder</code>调用 <code>addInterceptor()</code>:</p>
-<pre><code>OkHttpClient client = new OkHttpClient.Builder()
-    .addInterceptor(new LoggingInterceptor())
-    .build();
-
-Request request = new Request.Builder()
-    .url(&quot;http://www.publicobject.com/helloworld.txt&quot;)
-    .header(&quot;User-Agent&quot;, &quot;OkHttp Example&quot;)
-    .build();
-
-Response response = client.newCall(request).execute();
-response.body().close();
-</code></pre><p>The URL <code>http://www.publicobject.com/helloworld.txt</code> redirects to <code>https://publicobject.com/helloworld.txt</code>, and OkHttp follows this redirect automatically. Our application interceptor is called once and the response returned from <code>chain.proceed()</code> has the redirected response:</p>
-<p>URL <code>http://www.publicobject.com/helloworld.txt</code> 重定向到 <code>https://publicobject.com/helloworld.txt</code>, OkHttp 将会自动跟随这个重定向. 我们的应用拦截器被调用一次,响应通过 <code>chain.proceed()</code> 返回重定向的响应:</p>
-<pre><code>INFO: Sending request http://www.publicobject.com/helloworld.txt on null
-User-Agent: OkHttp Example
-
-INFO: Received response for https://publicobject.com/helloworld.txt in 1179.7ms
-Server: nginx/1.4.6 (Ubuntu)
-Content-Type: text/plain
-Content-Length: 1759
-Connection: keep-alive
-</code></pre><p>We can see that we were redirected because <code>response.request().url()</code> is different from <code>request.url()</code>. The two log statements log two different URLs.</p>
-<p>我们可以看到调用被重定向了,因为 <code>response.request().url()</code> 不同于 <code>request.url()</code>. 两个日志语句打印出两个不同的url.</p>
-<h2 id="Network-Interceptors-网络拦截器"><a href="#Network-Interceptors-网络拦截器" class="headerlink" title="Network Interceptors 网络拦截器"></a>Network Interceptors 网络拦截器</h2><p>Registering a network interceptor is quite similar. Call <code>addNetworkInterceptor()</code> instead of <code>addInterceptor()</code>:</p>
-<p>注册一个网络拦截器和上面非常相似. 调用 <code>addNetworkInterceptor()</code> 来代替 <code>addInterceptor()</code>:</p>
-<pre><code>OkHttpClient client = new OkHttpClient.Builder()
-    .addNetworkInterceptor(new LoggingInterceptor())
-    .build();
-
-Request request = new Request.Builder()
-    .url(&quot;http://www.publicobject.com/helloworld.txt&quot;)
-    .header(&quot;User-Agent&quot;, &quot;OkHttp Example&quot;)
-    .build();
-
-Response response = client.newCall(request).execute();
-response.body().close();
-</code></pre><p>When we run this code, the interceptor runs twice. Once for the initial request to <code>http://www.publicobject.com/helloworld.txt</code>, and another for the redirect to <code>https://publicobject.com/helloworld.txt</code>.</p>
-<p>当我们运行这段代码时,拦截器运行两次.第一次是初始化请求到 <code>http://www.publicobject.com/helloworld.txt</code>的时候调用,另一个用于重定向到 <code>https://publicobject.com/helloworld.txt</code>的时候.</p>
-<pre><code>INFO: Sending request http://www.publicobject.com/helloworld.txt on Connection{www.publicobject.com:80, proxy=DIRECT hostAddress=54.187.32.157 cipherSuite=none protocol=http/1.1}
-User-Agent: OkHttp Example
-Host: www.publicobject.com
-Connection: Keep-Alive
-Accept-Encoding: gzip
-
-INFO: Received response for http://www.publicobject.com/helloworld.txt in 115.6ms
-Server: nginx/1.4.6 (Ubuntu)
-Content-Type: text/html
-Content-Length: 193
-Connection: keep-alive
-Location: https://publicobject.com/helloworld.txt
-
-INFO: Sending request https://publicobject.com/helloworld.txt on Connection{publicobject.com:443, proxy=DIRECT hostAddress=54.187.32.157 cipherSuite=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA protocol=http/1.1}
-User-Agent: OkHttp Example
-Host: publicobject.com
-Connection: Keep-Alive
-Accept-Encoding: gzip
-
-INFO: Received response for https://publicobject.com/helloworld.txt in 80.9ms
-Server: nginx/1.4.6 (Ubuntu)
-Content-Type: text/plain
-Content-Length: 1759
-Connection: keep-alive
-</code></pre><p>The network requests also contain more data, such as the <code>Accept-Encoding: gzip</code> header added by OkHttp to advertise support for response compression. The network interceptor’s <code>Chain</code> has a non-null <code>Connection</code> that can be used to interrogate the IP address and TLS configuration that were used to connect to the webserver.</p>
-<p>网络请求也包含更多的数据,如 <code>Accept-Encoding: gzip</code> 头信息, OkHttp添加该头信息来通知并支持响应的压缩。网络拦截器链有一个非空连接,可用于查询用于连接到网络服务器的IP地址和TLS配置。</p>
-<h2 id="Choosing-between-application-and-network-interceptors-在应用和网络拦截器之间做选择"><a href="#Choosing-between-application-and-network-interceptors-在应用和网络拦截器之间做选择" class="headerlink" title="Choosing between application and network interceptors 在应用和网络拦截器之间做选择"></a>Choosing between application and network interceptors 在应用和网络拦截器之间做选择</h2><p>Each interceptor chain has relative merits.</p>
-<p>每个拦截器链都有自己的优点.</p>
-<h3 id="Application-interceptors"><a href="#Application-interceptors" class="headerlink" title="Application interceptors"></a>Application interceptors</h3><ul>
-<li>Don’t need to worry about intermediate responses like redirects and retries.</li>
-<li>Are always invoked once, even if the HTTP response is served from the cache.</li>
-<li>Observe the application’s original intent. Unconcerned with OkHttp-injected headers like <code>If-None-Match</code>.</li>
-<li>Permitted to short-circuit and not call <code>Chain.proceed()</code>.</li>
-<li>Permitted to retry and make multiple calls to <code>Chain.proceed()</code>.</li>
-</ul>
-<h3 id="应用拦截器"><a href="#应用拦截器" class="headerlink" title="应用拦截器"></a>应用拦截器</h3><ul>
-<li>不需要担心中间过程的响应,如重定向和重试.</li>
-<li>总是只调用一次,即使HTTP响应是从缓存中获取.</li>
-<li>观察应用程序的初衷. 不关心OkHttp注入的头信息如: <code>If-None-Match</code>.</li>
-<li>允许短路而不调用 <code>Chain.proceed()</code>,即中止调用.</li>
-<li>允许重试,使 <code>Chain.proceed()</code>调用多次.</li>
-</ul>
-<h3 id="Network-Interceptors"><a href="#Network-Interceptors" class="headerlink" title="Network Interceptors"></a>Network Interceptors</h3><ul>
-<li>Able to operate on intermediate responses like redirects and retries.</li>
-<li>Not invoked for cached responses that short-circuit the network.</li>
-<li>Observe the data just as it will be transmitted over the network.</li>
-<li>Access to the <code>Connection</code> that carries the request.</li>
-</ul>
-<h3 id="网络拦截器"><a href="#网络拦截器" class="headerlink" title="网络拦截器"></a>网络拦截器</h3><ul>
-<li>能够操作中间过程的响应,如重定向和重试.</li>
-<li>当网络短路而返回缓存响应时不被调用.</li>
-<li>只观察在网络上传输的数据.</li>
-<li>携带请求来访问连接.</li>
-</ul>
-<h2 id="Rewriting-Requests-重写请求"><a href="#Rewriting-Requests-重写请求" class="headerlink" title="Rewriting Requests 重写请求"></a>Rewriting Requests 重写请求</h2><p>Interceptors can add, remove, or replace request headers. They can also transform the body of those requests that have one. For example, you can use an application interceptor to add request body compression if you’re connecting to a webserver known to support it.</p>
-<p>拦截器可以添加、删除或替换请求头信息.他们还可以改变的请求携带的实体.例如, 如果你连接到一个支持压缩的网络服务器你可以使用一个应用拦截器来添加请求实体压缩.</p>
-<pre><code>/** This interceptor compresses the HTTP request body. Many webservers can&apos;t handle this! */
-/** 这个拦截器压缩了请求实体. 很多网络服务器无法处理它 */
-final class GzipRequestInterceptor implements Interceptor {
-  @Override public Response intercept(Interceptor.Chain chain) throws IOException {
-    Request originalRequest = chain.request();
-    if (originalRequest.body() == null || originalRequest.header(&quot;Content-Encoding&quot;) != null) {
-      return chain.proceed(originalRequest);
-    }
-
-    Request compressedRequest = originalRequest.newBuilder()
-        .header(&quot;Content-Encoding&quot;, &quot;gzip&quot;)
-        .method(originalRequest.method(), gzip(originalRequest.body()))
-        .build();
-    return chain.proceed(compressedRequest);
-  }
-
-  private RequestBody gzip(final RequestBody body) {
-    return new RequestBody() {
-      @Override public MediaType contentType() {
-        return body.contentType();
-      }
-
-      @Override public long contentLength() {
-        return -1; // We don&apos;t know the compressed length in advance!
-      }
-
-      @Override public void writeTo(BufferedSink sink) throws IOException {
-        BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
-        body.writeTo(gzipSink);
-        gzipSink.close();
-      }
-    };
-  }
-}
-</code></pre><h2 id="Rewriting-Responses-重写响应"><a href="#Rewriting-Responses-重写响应" class="headerlink" title="Rewriting Responses 重写响应"></a>Rewriting Responses 重写响应</h2><p>Symmetrically, interceptors can rewrite response headers and transform the response body. This is generally more dangerous than rewriting request headers because it may violate the webserver’s expectations!</p>
-<p>与重写请求对称,拦截器可以重写响应头信息和改变响应实体.这通常比重写请求头信息更加危险,因为它可能违反网络服务器的期望!</p>
-<p>If you’re in a tricky situation and prepared to deal with the consequences, rewriting response headers is a powerful way to work around problems. For example, you can fix a server’s misconfigured <code>Cache-Control</code> response header to enable better response caching:</p>
-<p>如果你在一个棘手的情况下,准备处理结果,重写响应头信息是一种强大的解决问题的方式.例如,您可以修复一个服务器配置错误的 <code>Cache-Control</code> 响应头信息,来确保更好的响应缓存:</p>
-<pre><code>/** Dangerous interceptor that rewrites the server&apos;s cache-control header. */
-/** 重写服务器 cache-control 头信息的拦截器是危险的. */
-private static final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = new Interceptor() {
-  @Override public Response intercept(Interceptor.Chain chain) throws IOException {
-    Response originalResponse = chain.proceed(chain.request());
-    return originalResponse.newBuilder()
-        .header(&quot;Cache-Control&quot;, &quot;max-age=60&quot;)
-        .build();
-  }
-};
-</code></pre><p>Typically this approach works best when it complements a corresponding fix on the webserver!</p>
-<p>通常这种方法最好实现在相应的网络服务器上!</p>
-<h2 id="Availability-可用性"><a href="#Availability-可用性" class="headerlink" title="Availability 可用性"></a>Availability 可用性</h2><p>OkHttp’s interceptors require OkHttp 2.2 or better. Unfortunately, interceptors do not work with <code>OkUrlFactory</code>, or the libraries that build on it, including <a href="http://square.github.io/retrofit/" target="_blank" rel="external">Retrofit</a> ≤ 1.8 and <a href="http://square.github.io/picasso/" target="_blank" rel="external">Picasso</a> ≤ 2.4.</p>
-<p>OkHttp的拦截器需要OkHttp 2.2或以上.不幸的是,拦截器不能和 <code>OkUrlFactory</code>同时工作,或其他库的构建,包括 <a href="http://square.github.io/retrofit/" target="_blank" rel="external">Retrofit</a> ≤ 1.8和 <a href="http://square.github.io/picasso/" target="_blank" rel="external">Picasso</a> ≤ 2.4.</p>
-<hr>
-<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
-<ol>
-<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
-<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
-<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
-<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
-<li>Okhttp-wiki 之 Interceptors 拦截器</li>
-<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
-</ol>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-HTTPS" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/03/11/HTTPS/" class="article-date">
-  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/11/HTTPS/">Okhttp-wiki 之 HTTPS</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Okhttp-wiki-之-HTTPS"><a href="#Okhttp-wiki-之-HTTPS" class="headerlink" title="Okhttp-wiki 之 HTTPS"></a>Okhttp-wiki 之 HTTPS</h1><p>OkHttp attempts to balance two competing concerns:</p>
-<ul>
-<li><strong>Connectivity</strong> to as many hosts as possible. That includes advanced hosts that run the latest versions of <a href="https://boringssl.googlesource.com/boringssl/" target="_blank" rel="external">boringssl</a> and less out of date hosts running older versions of <a href="https://www.openssl.org/" target="_blank" rel="external">OpenSSL</a>.</li>
-<li><strong>Security</strong> of the connection. This includes verification of the remote webserver with certificates and the privacy of data exchanged with strong ciphers.</li>
-</ul>
-<p>OkHttp试图平衡下面两者之间的矛盾关系:</p>
-<ul>
-<li>尽可能多的主机连接.这包括运行最新版本先进的<a href="https://boringssl.googlesource.com/boringssl/" target="_blank" rel="external">boringssl</a>主机和运行旧版本过时的<a href="https://www.openssl.org/" target="_blank" rel="external">OpenSSL</a>主机.</li>
-<li>连接安全.这包括远程网络服务器证书的验证和用很强的密码交换数据的隐私.</li>
-</ul>
-<p>When negotiating a connection to an HTTPS server, OkHttp needs to know which <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/TlsVersion.html" target="_blank" rel="external">TLS versions</a> and <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CipherSuite.html" target="_blank" rel="external">cipher suites</a> to offer. A client that wants to maximize connectivity would include obsolete TLS versions and weak-by-design cipher suites. A strict client that wants to maximize security would be limited to only the latest TLS version and strongest cipher suites.</p>
-<p>当判断一个连接到HTTPS服务器的连接,OkHttp需要知道是哪个TLS版本和提供的密码组合.客户端想要最大化连接将包括过时的TLS版本和很弱的密码套件.一个严谨的客户希望最大化安全将仅限于最新的TLS版本和最强的密码组合.</p>
-<p>Specific security vs. connectivity decisions are implemented by <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionSpec.html" target="_blank" rel="external">ConnectionSpec</a>. OkHttp includes three built-in connection specs:</p>
-<ul>
-<li><code>MODERN_TLS</code> is a secure configuration that connects to modern HTTPS servers.</li>
-<li><code>COMPATIBLE_TLS</code> is a secure configuration that connects to secure–but not current–HTTPS servers.</li>
-<li><code>CLEARTEXT</code> is an insecure configuration that is used for <code>http://</code> URLs.</li>
-</ul>
-<p>特定的安全与决定连接是由<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionSpec.html" target="_blank" rel="external">ConnectionSpec</a>实现.OkHttp包含三个内置的连接标准:</p>
-<ul>
-<li><code>MODERN_TLS</code> 是一个安全的配置,连接到现有服务器.</li>
-<li><code>COMPATIBLE_TLS</code>  是一个安全的配置,连接到安全的但不是现有服务器.</li>
-<li><code>CLEARTEXT</code> 是一个不安全的配置, 用于 http:// 的URLs.</li>
-</ul>
-<p>By default, OkHttp will attempt a <code>MODERN_TLS</code> connection, and fall back to <code>COMPATIBLE_TLS</code> connection if the modern configuration fails.</p>
-<p>默认情况下,OkHttp将尝试 <code>MODERN_TLS</code> 连接,如果现有配置失败则回退至 <code>COMPATIBLE_TLS</code> 连接.</p>
-<p>The TLS versions and cipher suites in each spec can change with each release. For example, in OkHttp 2.2 we dropped support for SSL 3.0 in response to the <a href="http://googleonlinesecurity.blogspot.ca/2014/10/this-poodle-bites-exploiting-ssl-30.html" target="_blank" rel="external">POODLE</a> attack. And in OkHttp 2.3 we dropped support for <a href="http://en.wikipedia.org/wiki/RC4#Security" target="_blank" rel="external">RC4</a>. As with your desktop web browser, staying up-to-date with OkHttp is the best way to stay secure.</p>
-<p>TLS版本和密码组合在每个规格下可以改变每个版本.例如,OkHttp 2.2我们为 <a href="http://googleonlinesecurity.blogspot.ca/2014/10/this-poodle-bites-exploiting-ssl-30.html" target="_blank" rel="external">POODLE</a> 攻击向下兼容支持SSL3.0;我们在OkHttp 2.3向下兼容支持 <a href="http://en.wikipedia.org/wiki/RC4#Security" target="_blank" rel="external">RC4</a>.与桌面浏览器相同,保持安全最好的办法是保持OkHttp是最新的.</p>
-<p>You can build your own connection spec with a custom set of TLS versions and cipher suites. For example, this configuration is limited to three highly-regarded cipher suites. Its drawback is that it requires Android 5.0+ and a similarly current webserver.</p>
-<p>你也可以建立自己的连接规范带有一套定制的TLS版本和密码套件.例如,这个配置仅限于三个主要的密码组合.它的缺点是它需要Android 5.0+和相似的现有网络服务器.</p>
-<pre><code>ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)  
-    .tlsVersions(TlsVersion.TLS_1_2)
-    .cipherSuites(
-          CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
-          CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
-          CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256)
-    .build();
-
-OkHttpClient client = new OkHttpClient.Builder() 
-    .connectionSpecs(Collections.singletonList(spec))
-    .build();
-</code></pre><h2 id="Certificate-Pinning-证书锁定"><a href="#Certificate-Pinning-证书锁定" class="headerlink" title="Certificate Pinning 证书锁定"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CertificatePinning.java" target="_blank" rel="external">Certificate Pinning 证书锁定</a></h2><p>By default, OkHttp trusts the certificate authorities of the host platform. This strategy maximizes connectivity, but it is subject to certificate authority attacks such as the <a href="http://www.computerworld.com/article/2510951/cybercrime-hacking/hackers-spied-on-300-000-iranians-using-fake-google-certificate.html" target="_blank" rel="external">2011 DigiNotar attack</a>. It also assumes your HTTPS servers’ certificates are signed by a certificate authority.</p>
-<p>默认情况下,OkHttp信任主机平台的认证中心.这一策略最大化连接,但受制于<a href="http://www.computerworld.com/article/2510951/cybercrime-hacking/hackers-spied-on-300-000-iranians-using-fake-google-certificate.html" target="_blank" rel="external">2011 DigiNotar attack</a>等认证授权攻击.它还假定HTTPS服务器的证书已经被认证中心签约.</p>
-<p>Use <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CertificatePinner.html" target="_blank" rel="external">CertificatePinner</a> to constrain which certificate authorities are trusted. Certificate pinning increases security, but limits your server team’s abilities to update their TLS certificates. <strong>Do not use certificate pinning without the blessing of your server’s TLS administrator!</strong></p>
-<p>使用 <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CertificatePinner.html" target="_blank" rel="external">CertificatePinner</a> 约束所信任的认证中心.证书锁定将增加安全性,但受制于服务器团队的能力来更新他们的TLS证书.<strong>不要在没有通知使用你的服务器的TLS管理员的情况下使用证书锁定!</strong></p>
-<pre><code>public CertificatePinning() {
-  client = new OkHttpClient.Builder()
-      .certificatePinner(new CertificatePinner.Builder()
-          .add(&quot;publicobject.com&quot;, &quot;sha1/DmxUShsZuNiqPQsX2Oi9uv2sCnw=&quot;)
-          .add(&quot;publicobject.com&quot;, &quot;sha1/SXxoaOSEzPC6BgGmxAt/EAcsajw=&quot;)
-          .add(&quot;publicobject.com&quot;, &quot;sha1/blhOM3W9V/bVQhsWAcLYwPU6n24=&quot;)
-          .add(&quot;publicobject.com&quot;, &quot;sha1/T5x9IXmcrQ7YuQxXnxoCmeeQ84c=&quot;)
-          .build())
-      .build();
-}
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;https://publicobject.com/robots.txt&quot;)
-      .build();
-
-  Response response = client.newCall(request).execute();
-  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
-
-  for (Certificate certificate : response.handshake().peerCertificates()) {
-    System.out.println(CertificatePinner.pin(certificate));
-  }
-}
-</code></pre><h2 id="Customizing-Trusted-Certificates-定制被信任的证书"><a href="#Customizing-Trusted-Certificates-定制被信任的证书" class="headerlink" title="Customizing Trusted Certificates 定制被信任的证书"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CustomTrust.java" target="_blank" rel="external">Customizing Trusted Certificates 定制被信任的证书</a></h2><p>The full code sample shows how to replace the host platform’s certificate authorities with your own set. As above, <strong>do not use custom certificates without the blessing of your server’s TLS administrator!</strong></p>
-<p>完整的代码示例展示了如何用你自己的设置替换主机平台的认证中心.<strong>不要在没有通知使用你的服务器的TLS管理员的情况下定制证书!</strong></p>
-<pre><code>private final OkHttpClient client;
-
-public CustomTrust() {
-  SSLContext sslContext = sslContextForTrustedCertificates(trustedCertificatesInputStream());
-  client = new OkHttpClient.Builder()
-      .sslSocketFactory(sslContext.getSocketFactory())
-      .build();
-}
-
-public void run() throws Exception {
-  Request request = new Request.Builder()
-      .url(&quot;https://publicobject.com/helloworld.txt&quot;)
-      .build();
-
-  Response response = client.newCall(request).execute();
-  System.out.println(response.body().string());
-}
-
-private InputStream trustedCertificatesInputStream() {
-  ... // Full source omitted. See sample.
-      // 详细代码请看官方sample,点击标题链接进入
-}
-
-public SSLContext sslContextForTrustedCertificates(InputStream in) {
-  ... // Full source omitted. See sample.
-}
-</code></pre><hr>
-<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
-<ol>
-<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
-<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
-<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
-<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
-<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
-<li>Okhttp-wiki 之 HTTPS</li>
-</ol>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
     <article id="post-OkHttp" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
@@ -1312,6 +422,136 @@ public SSLContext sslContextForTrustedCertificates(InputStream in) {
       
         <p class="article-more-link">
           <a  href="/2016/03/11/OkHttp/#more">more >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Interceptors" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/11/Interceptors/" class="article-date">
+  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/11/Interceptors/">Okhttp-wiki 之 Interceptors 拦截器</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Okhttp-wiki-之-Interceptors-拦截器"><a href="#Okhttp-wiki-之-Interceptors-拦截器" class="headerlink" title="Okhttp-wiki 之 Interceptors 拦截器"></a>Okhttp-wiki 之 Interceptors 拦截器</h1><p>Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.</p>
+<p>拦截器是一种强大的机制,可以监视、重写和重试调用.下面是一个简单例子,拦截发出的请求和传入的响应的日志.<br>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a  href="/2016/03/11/Interceptors/#more">more >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Connections" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/11/Connections/" class="article-date">
+  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/11/Connections/">Okhttp-wiki 之 Connections 连接</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Okhttp-wiki-之-Connections-连接"><a href="#Okhttp-wiki-之-Connections-连接" class="headerlink" title="Okhttp-wiki 之 Connections 连接"></a>Okhttp-wiki 之 Connections 连接</h1><p>Although you provide only the URL, OkHttp plans its connection to your webserver using three types: URL, Address, and Route.</p>
+<p>虽然你只需要提供URL,但OkHttp计划它连接到您的网络服务器需要使用三种类型:URL,地址和路线.<br>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a  href="/2016/03/11/Connections/#more">more >></a>
         </p>
       
       <div class="clearfix"></div>
@@ -1395,10 +635,10 @@ public SSLContext sslContextForTrustedCertificates(InputStream in) {
 
 
   
-    <article id="post-Connections" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-HTTPS" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2016/03/11/Connections/" class="article-date">
+      <a href="/2016/03/11/HTTPS/" class="article-date">
   	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
 </a>
     </div>
@@ -1412,7 +652,7 @@ public SSLContext sslContextForTrustedCertificates(InputStream in) {
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/11/Connections/">Okhttp-wiki 之 Connections 连接</a>
+      <a class="article-title" href="/2016/03/11/HTTPS/">Okhttp-wiki 之 HTTPS</a>
     </h1>
   
 
@@ -1421,63 +661,15 @@ public SSLContext sslContextForTrustedCertificates(InputStream in) {
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Okhttp-wiki-之-Connections-连接"><a href="#Okhttp-wiki-之-Connections-连接" class="headerlink" title="Okhttp-wiki 之 Connections 连接"></a>Okhttp-wiki 之 Connections 连接</h1><p>Although you provide only the URL, OkHttp plans its connection to your webserver using three types: URL, Address, and Route.</p>
-<p>虽然你只需要提供URL,但OkHttp计划它连接到您的网络服务器需要使用三种类型:URL,地址和路线.</p>
-<h2 id="URLs"><a href="#URLs" class="headerlink" title="URLs"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/HttpUrl.html" target="_blank" rel="external">URLs</a></h2><p>URLs (like <a href="https://github.com/square/okhttp" target="_blank" rel="external">https://github.com/square/okhttp</a>) are fundamental to HTTP and the Internet. In addition to being a universal, decentralized naming scheme for everything on the web, they also specify how to access web resources.</p>
-<p>URLs(例如<a href="https://github.com/square/okhttp)是HTTP和互联网的基础。除了网络所有事物普遍的、分散的命名方案之外,他们还指定如何访问网络资源" target="_blank" rel="external">https://github.com/square/okhttp)是HTTP和互联网的基础。除了网络所有事物普遍的、分散的命名方案之外,他们还指定如何访问网络资源</a>.</p>
-<p>URLs are abstract:</p>
+        <h1 id="Okhttp-wiki-之-HTTPS"><a href="#Okhttp-wiki-之-HTTPS" class="headerlink" title="Okhttp-wiki 之 HTTPS"></a>Okhttp-wiki 之 HTTPS</h1><p>OkHttp attempts to balance two competing concerns:</p>
 <ul>
-<li>They specify that the call may be plaintext (http) or encrypted (https), but not which cryptographic algorithms should be used. Nor do they specify how to verify the peer’s certificates (the <a href="http://developer.android.com/reference/javax/net/ssl/HostnameVerifier.html" target="_blank" rel="external">HostnameVerifier</a>) or which certificates can be trusted (the <a href="http://developer.android.com/reference/org/apache/http/conn/ssl/SSLSocketFactory.html" target="_blank" rel="external">SSLSocketFactory</a>).</li>
-<li>They don’t specify whether a specific proxy server should be used or how to authenticate with that proxy server.</li>
+<li><strong>Connectivity</strong> to as many hosts as possible. That includes advanced hosts that run the latest versions of <a href="https://boringssl.googlesource.com/boringssl/">boringssl</a> and less out of date hosts running older versions of <a href="https://www.openssl.org/">OpenSSL</a>.</li>
+<li><strong>Security</strong> of the connection. This includes verification of the remote webserver with certificates and the privacy of data exchanged with strong ciphers.</li>
 </ul>
-<p>URLs 是抽象的:</p>
+<p>OkHttp试图平衡下面两者之间的矛盾关系:</p>
 <ul>
-<li>他们指定的调用可能是明文的(http)或加密的(https),但不使用任何加密算法。他们也不指定如何验证对等的证书(<a href="http://developer.android.com/reference/javax/net/ssl/HostnameVerifier.html" target="_blank" rel="external">HostnameVerifier</a>)或哪个证书可以被信任(<a href="http://developer.android.com/reference/org/apache/http/conn/ssl/SSLSocketFactory.html" target="_blank" rel="external">SSLSocketFactory</a>)。</li>
-<li>他们没有指定是否应该使用一个特定的代理服务器或使用该代理服务器进行身份验证。</li>
-</ul>
-<p>They’re also concrete: each URL identifies a specific path (like /square/okhttp) and query (like ?q=sharks&amp;lang=en). Each webserver hosts many URLs.</p>
-<p>他们也很具体:每个URL标识一个特定的路径(比如/square/okhttp)和询问(? q = sharks&amp;lang = en).每一个网络服务器主导很多url.</p>
-<h2 id="Addresses-地址"><a href="#Addresses-地址" class="headerlink" title="Addresses 地址"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Address.html" target="_blank" rel="external">Addresses 地址</a></h2><p>Addresses specify a webserver (like github.com) and all of the <strong>static</strong> configuration necessary to connect to that server: the port number, HTTPS settings, and preferred network protocols (like HTTP/2 or SPDY).</p>
-<p>地址指定一个网络服务器(比如github.com)和连接到服务器必要的所有的<strong>静态</strong>配置:端口号,HTTPS设置和首选网络协议(如HTTP/2 or SPDY)。</p>
-<p>URLs that share the same address may also share the same underlying TCP socket connection. Sharing a connection has substantial performance benefits: lower latency, higher throughput (due to <a href="http://www.igvita.com/2011/10/20/faster-web-vs-tcp-slow-start/" target="_blank" rel="external">TCP slow start</a>) and conserved battery. OkHttp uses a <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionPool.html" target="_blank" rel="external">ConnectionPool</a> that automatically reuses HTTP/1.x connections and multiplexes HTTP/2 and SPDY connections.</p>
-<p>URLs共享相同的地址也可以共享相同的底层TCP socket连接。共享一个连接有巨大的性能优势:低延迟、高吞吐量(由于<a href="http://www.igvita.com/2011/10/20/faster-web-vs-tcp-slow-start/" target="_blank" rel="external">TCP慢启动</a>)和保守的电量。OkHttp使用<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionPool.html" target="_blank" rel="external">连接池</a>自动重用HTTP/1.x连接和多样的HTTP/2 and SPDY 连接.</p>
-<p>In OkHttp some fields of the address come from the URL (scheme, hostname, port) and the rest come from the <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/OkHttpClient.html" target="_blank" rel="external">OkHttpClient</a>.</p>
-<p>在OkHttp中一些地址的字段来自URL(计划、主机名、端口),其余来自<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/OkHttpClient.html" target="_blank" rel="external">OkHttpClient</a>.</p>
-<h2 id="Routes-线路"><a href="#Routes-线路" class="headerlink" title="Routes 线路"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Route.html" target="_blank" rel="external">Routes 线路</a></h2><p>Routes supply the <strong>dynamic</strong> information necessary to actually connect to a webserver. This is the specific IP address to attempt (as discovered by a DNS query), the exact proxy server to use (if a <a href="http://developer.android.com/reference/java/net/ProxySelector.html" target="_blank" rel="external">ProxySelector</a> is in use), and which version of TLS to negotiate (for HTTPS connections).</p>
-<p>线路提供动态信息需要实时连接到网络服务器。这是尝试特定的IP地址(如一个DNS访问被发现),准确的使用代理服务器(如果使用<a href="http://developer.android.com/reference/java/net/ProxySelector.html" target="_blank" rel="external">ProxySelector</a>),和哪个版本的TLS交涉(HTTPS连接)。</p>
-<p>There may be many routes for a single address. For example, a webserver that is hosted in multiple datacenters may yield multiple IP addresses in its DNS response.</p>
-<p>可能有很多路线共用一个地址。例如,一个网络服务器驻留在多个数据中心可能在DNS的回应中产生多个IP地址。</p>
-<h2 id="Connections-连接"><a href="#Connections-连接" class="headerlink" title="Connections 连接"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Connection.html" target="_blank" rel="external">Connections 连接</a></h2><p>When you request a URL with OkHttp, here’s what it does:</p>
-<ol>
-<li>It uses the URL and configured OkHttpClient to create an <strong>address</strong>. This address specifies how we’ll connect to the webserver.</li>
-<li>It attempts to retrieve a connection with that address from the <strong>connection pool</strong>.</li>
-<li>If it doesn’t find a connection in the pool, it selects a <strong>route</strong> to attempt. This usually means making a DNS request to get the server’s IP addresses. It then selects a TLS version and proxy server if necessary.</li>
-<li>If it’s a new route, it connects by building either a direct socket connection, a TLS tunnel (for HTTPS over an HTTP proxy), or a direct TLS connection. It does TLS handshakes as necessary.</li>
-<li>It sends the HTTP request and reads the response.</li>
-</ol>
-<p>当你用OkHttp请求URL,它所做的:</p>
-<ol>
-<li>它使用URL和配置好的OkHttpClient创建一个<strong>地址</strong>.这个地址指定我们将如何连接到网络服务器.</li>
-<li>它试图从<strong>连接池</strong>中检索是否存在该地址的连接.</li>
-<li>如果在连接池中没有找到一个连接,它尝试选择一条路线.这通常意味着一个DNS请求服务器的IP地址.然后选择一个TLS版本和在必要时使用代理服务器.</li>
-<li>如果这是一个新的线路,它通过建立一个直接的socket连接,TLS隧道(HTTP代理上的HTTPS),或直接TLS连接.必要时与TLS握手。</li>
-<li>它发送HTTP请求并读取响应.</li>
-</ol>
-<p>If there’s a problem with the connection, OkHttp will select another route and try again. This allows OkHttp to recover when a subset of a server’s addresses are unreachable. It’s also useful when a pooled connection is stale or if the attempted TLS version is unsupported.</p>
-<p>如果连接发生问题,OkHttp会选择另一条路线,并再试一次.这允许OkHttp当服务器地址的子设备无法访问时重新访问.在某个依赖的连接失效或者尝试TLS版本是不支持的时候同样非常有用.</p>
-<p>Once the response has been received, the connection will be returned to the pool so it can be reused for a future request. Connections are evicted from the pool after a period of inactivity.</p>
-<p>只有在接收到响应后,连接将会返回到连接池中,因此它可以被之后的请求重用.经过一段时间不活动的连接会被连接池清除.</p>
-<hr>
-<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
-<ol>
-<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
-<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
-<li>Okhttp-wiki 之 Connections 连接</li>
-<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
-<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
-<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
-</ol>
-
+<li>尽可能多的主机连接.这包括运行最新版本先进的<a href="https://boringssl.googlesource.com/boringssl/">boringssl</a>主机和运行旧版本过时的<a href="https://www.openssl.org/">OpenSSL</a>主机.</li>
+<li>连接安全.这包括远程网络服务器证书的验证和用很强的密码交换数据的隐私.
       
     </div>
     
@@ -1494,6 +686,75 @@ public SSLContext sslContextForTrustedCertificates(InputStream in) {
 	</div>
 
 
+      
+        <p class="article-more-link">
+          <a  href="/2016/03/11/HTTPS/#more">more >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Recipes" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/11/Recipes/" class="article-date">
+  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/11/Recipes/">Okhttp-wiki 之 Recipes 秘诀(食谱)</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Okhttp-wiki-之-Recipes-秘诀-食谱"><a href="#Okhttp-wiki-之-Recipes-秘诀-食谱" class="headerlink" title="Okhttp-wiki 之 Recipes 秘诀(食谱)"></a>Okhttp-wiki 之 Recipes 秘诀(食谱)</h1><p>We’ve written some recipes that demonstrate how to solve common problems with OkHttp. Read through them to learn about how everything works together. Cut-and-paste these examples freely; that’s what they’re for.</p>
+<p>我们写了一些秘诀来演示OkHttp如何解决常见问题。通读他们了解在一起做的任何事情。你可以自由复制粘贴这些例子;这就是他们的目的。<br>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a  href="/2016/03/11/Recipes/#more">more >></a>
+        </p>
       
       <div class="clearfix"></div>
     </div>
@@ -1546,11 +807,11 @@ public SSLContext sslContextForTrustedCertificates(InputStream in) {
 <p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
 <ol>
 <li>Okhttp-wiki 之 Home 主页</li>
-<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
-<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
-<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
-<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
-<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Calls/" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Connections/" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Recipes/" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/Interceptors/" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
+<li><a href="http://www.hanzhifengyun.com/2016/03/11/HTTPS/" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
 </ol>
 
       
