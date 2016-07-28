@@ -333,8 +333,14 @@
 </blockquote>
 <p>相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?</p>
 <p>上一篇文章提到Java通过Executors来创建四种线程池, 进入源码我们会发现, 真正的线程池的实现为 <code>ThreadPoolExecutor</code> .</p>
-<h2 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor #\"></a>ThreadPoolExecutor #\</h2><p>public ThreadPoolExecutor(int corePoolSize,<br>  int maximumPoolSize,<br>  long keepAliveTime,<br>  TimeUnit unit,<br>  BlockingQueue\<runnable\> workQueue,<br>  ThreadFactory threadFactory,<br>  RejectedExecutionHandler handler) </runnable\></p>
-<p><code>ThreadPoolExecutor</code>的构造函数的参数用来配置线程池, 下面我们一个个来分析:</p>
+<h2 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor"></a>ThreadPoolExecutor</h2><pre><code>public ThreadPoolExecutor(int corePoolSize,
+  int maximumPoolSize,
+  long keepAliveTime,
+  TimeUnit unit,
+  BlockingQueue\&lt;Runnable\&gt; workQueue,
+  ThreadFactory threadFactory,
+  RejectedExecutionHandler handler) 
+</code></pre><p><code>ThreadPoolExecutor</code>的构造函数的参数用来配置线程池, 下面我们一个个来分析:</p>
 <ol>
 <li><p><code>corePoolSize</code> :线程池的核心线程数, 一般情况下不管有没有任务都会一直在线程池中一直存活, 只有在 <code>ThreadPoolExecutor</code>中的方法 <code>allowCoreThreadTimeOut(boolean value)</code> 设置为 <code>true</code>时, 闲置的核心线程会存在超时机制, 如果在指定时间没有新任务来时, 核心线程也会被终止, 而这个时间间隔由第3个属性 <code>keepAliveTime</code> 指定.</p>
 </li>
@@ -354,7 +360,7 @@
 <blockquote>
 <p>上面是完整的构造函数, <code>ThreadPoolExecutor</code>还提供其他构造函数, 参数6 和 7 是可选的, 不配置则使用默认配置.</p>
 </blockquote>
-<h2 id="ThreadPoolExecutor-的核心实现-execute"><a href="#ThreadPoolExecutor-的核心实现-execute" class="headerlink" title="ThreadPoolExecutor 的核心实现: execute() #\"></a>ThreadPoolExecutor 的核心实现: execute() #\</h2><hr>
+<h2 id="ThreadPoolExecutor-的核心实现-execute"><a href="#ThreadPoolExecutor-的核心实现-execute" class="headerlink" title="ThreadPoolExecutor 的核心实现: execute()"></a>ThreadPoolExecutor 的核心实现: execute()</h2><hr>
 <p> <strong>重头戏来了</strong>,由于源码封装较多,它的代码量也就下面几行:这边直接贴出来</p>
 <p>public void execute(Runnable command)<br>if (command == null)<br>throw new NullPointerException();<br>int c = ctl.get();<br>//如果运行中的线程少于核心线程的数量<br>if (workerCountOf(c) \&lt; corePoolSize)<br>//启动一个核心线程来执行任务<br>if (addWorker(command, true))<br>return;<br>//如果增加该线程失败时的情况,继续往下走<br>c = ctl.get();<br>}<br>//如果一个任务被加入任务队列中<br>if (isRunning(c) &amp;&amp; workQueue.offer(command))<br>int recheck = ctl.get();<br>//仍然需要仔细检查我们是否应该添加一个线程(因为上次检查存在的任务可能已经终止),或者在进入这个方法的时候线程池被关闭<br>if (! isRunning(recheck) &amp;&amp; remove(command))<br>reject(command);<br>//然后再次检查有没有正在运行的线程<br>else if (workerCountOf(recheck) == 0)<br>addWorker(null, false);<br>}<br>//如果任务不能被加入任务队列,则尝试添加一个新线程去执行,如果失败了,也许可能任务已被取消或者任务队列已经饱和,所以拒绝任务.<br>else if (!addWorker(command, false))<br>reject(command);<br>}</p>
 <blockquote>
