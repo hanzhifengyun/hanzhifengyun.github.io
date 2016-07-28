@@ -1,0 +1,902 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Okhttp," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Okhttp-wiki 之 Interceptors 拦截器Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.
+拦截">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Okhttp-wiki 之 Interceptors 拦截器">
+<meta property="og:url" content="http://yoursite.com/2016/03/11/Interceptors/index.html">
+<meta property="og:site_name" content="汉之风云">
+<meta property="og:description" content="Okhttp-wiki 之 Interceptors 拦截器Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.
+拦截">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1504154-8daf5fd9540545d3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2016-07-28T07:28:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Okhttp-wiki 之 Interceptors 拦截器">
+<meta name="twitter:description" content="Okhttp-wiki 之 Interceptors 拦截器Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.
+拦截">
+<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/1504154-8daf5fd9540545d3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/03/11/Interceptors/"/>
+
+  <title> Okhttp-wiki 之 Interceptors 拦截器 | 汉之风云 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=57651172";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">汉之风云</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Okhttp-wiki 之 Interceptors 拦截器
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-03-11T10:51:52+08:00" content="2016-03-11">
+              2016-03-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Okhttp/" itemprop="url" rel="index">
+                    <span itemprop="name">Okhttp</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/03/11/Interceptors/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/11/Interceptors/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Okhttp-wiki-之-Interceptors-拦截器"><a href="#Okhttp-wiki-之-Interceptors-拦截器" class="headerlink" title="Okhttp-wiki 之 Interceptors 拦截器"></a>Okhttp-wiki 之 Interceptors 拦截器</h1><p>Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.</p>
+<p>拦截器是一种强大的机制,可以监视、重写和重试调用.下面是一个简单例子,拦截发出的请求和传入的响应的日志.</p>
+<pre><code>class LoggingInterceptor implements Interceptor {
+  @Override public Response intercept(Interceptor.Chain chain) throws IOException {
+    Request request = chain.request();
+
+    long t1 = System.nanoTime();
+    logger.info(String.format(&quot;Sending request %s on %s%n%s&quot;,
+        request.url(), chain.connection(), request.headers()));
+
+    Response response = chain.proceed(request);
+
+    long t2 = System.nanoTime();
+    logger.info(String.format(&quot;Received response for %s in %.1fms%n%s&quot;,
+        response.request().url(), (t2 - t1) / 1e6d, response.headers()));
+
+    return response;
+  }
+}
+</code></pre><p>A call to <code>chain.proceed(request)</code> is a critical part of each interceptor’s implementation. This simple-looking method is where all the HTTP work happens, producing a response to satisfy the request.</p>
+<p>调用 <code>chain.proceed(request)</code> 是每个拦截器的关键部分的实现.这个简单的方法存在所有HTTP工作发生的地方,生产满足请求的响应.</p>
+<p>Interceptors can be chained. Suppose you have both a compressing interceptor and a checksumming interceptor: you’ll need to decide whether data is compressed and then checksummed, or checksummed and then compressed. OkHttp uses lists to track interceptors, and interceptors are called in order.</p>
+<p>拦截器可以多个链接.假设您有一个压缩拦截器和校验拦截器:你需要决定数据是先压缩然后校验,还是先校验后压缩.OkHttp使用列表追踪拦截器,拦截器按顺序被调用。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1504154-8daf5fd9540545d3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h2 id="Application-Interceptors-应用拦截器"><a href="#Application-Interceptors-应用拦截器" class="headerlink" title="Application Interceptors 应用拦截器"></a>Application Interceptors 应用拦截器</h2><p>Interceptors are registered as either application or network interceptors. We’ll use the <code>LoggingInterceptor</code> defined above to show the difference.</p>
+<p>拦截器可以被应用程序或网络注册,我们将使用上面定义的 <code>LoggingInterceptor</code> 显示两者之间的差异.</p>
+<p>Register an application interceptor by calling <code>addInterceptor()</code> on:</p>
+<p>注册一个应用拦截器通过 <code>OkHttpClient.Builder</code>调用 <code>addInterceptor()</code>:</p>
+<pre><code>OkHttpClient client = new OkHttpClient.Builder()
+    .addInterceptor(new LoggingInterceptor())
+    .build();
+
+Request request = new Request.Builder()
+    .url(&quot;http://www.publicobject.com/helloworld.txt&quot;)
+    .header(&quot;User-Agent&quot;, &quot;OkHttp Example&quot;)
+    .build();
+
+Response response = client.newCall(request).execute();
+response.body().close();
+</code></pre><p>The URL <code>http://www.publicobject.com/helloworld.txt</code> redirects to <code>https://publicobject.com/helloworld.txt</code>, and OkHttp follows this redirect automatically. Our application interceptor is called once and the response returned from <code>chain.proceed()</code> has the redirected response:</p>
+<p>URL <code>http://www.publicobject.com/helloworld.txt</code> 重定向到 <code>https://publicobject.com/helloworld.txt</code>, OkHttp 将会自动跟随这个重定向. 我们的应用拦截器被调用一次,响应通过 <code>chain.proceed()</code> 返回重定向的响应:</p>
+<pre><code>INFO: Sending request http://www.publicobject.com/helloworld.txt on null
+User-Agent: OkHttp Example
+
+INFO: Received response for https://publicobject.com/helloworld.txt in 1179.7ms
+Server: nginx/1.4.6 (Ubuntu)
+Content-Type: text/plain
+Content-Length: 1759
+Connection: keep-alive
+</code></pre><p>We can see that we were redirected because <code>response.request().url()</code> is different from <code>request.url()</code>. The two log statements log two different URLs.</p>
+<p>我们可以看到调用被重定向了,因为 <code>response.request().url()</code> 不同于 <code>request.url()</code>. 两个日志语句打印出两个不同的url.</p>
+<h2 id="Network-Interceptors-网络拦截器"><a href="#Network-Interceptors-网络拦截器" class="headerlink" title="Network Interceptors 网络拦截器"></a>Network Interceptors 网络拦截器</h2><p>Registering a network interceptor is quite similar. Call <code>addNetworkInterceptor()</code> instead of <code>addInterceptor()</code>:</p>
+<p>注册一个网络拦截器和上面非常相似. 调用 <code>addNetworkInterceptor()</code> 来代替 <code>addInterceptor()</code>:</p>
+<pre><code>OkHttpClient client = new OkHttpClient.Builder()
+    .addNetworkInterceptor(new LoggingInterceptor())
+    .build();
+
+Request request = new Request.Builder()
+    .url(&quot;http://www.publicobject.com/helloworld.txt&quot;)
+    .header(&quot;User-Agent&quot;, &quot;OkHttp Example&quot;)
+    .build();
+
+Response response = client.newCall(request).execute();
+response.body().close();
+</code></pre><p>When we run this code, the interceptor runs twice. Once for the initial request to <code>http://www.publicobject.com/helloworld.txt</code>, and another for the redirect to <code>https://publicobject.com/helloworld.txt</code>.</p>
+<p>当我们运行这段代码时,拦截器运行两次.第一次是初始化请求到 <code>http://www.publicobject.com/helloworld.txt</code>的时候调用,另一个用于重定向到 <code>https://publicobject.com/helloworld.txt</code>的时候.</p>
+<pre><code>INFO: Sending request http://www.publicobject.com/helloworld.txt on Connection{www.publicobject.com:80, proxy=DIRECT hostAddress=54.187.32.157 cipherSuite=none protocol=http/1.1}
+User-Agent: OkHttp Example
+Host: www.publicobject.com
+Connection: Keep-Alive
+Accept-Encoding: gzip
+
+INFO: Received response for http://www.publicobject.com/helloworld.txt in 115.6ms
+Server: nginx/1.4.6 (Ubuntu)
+Content-Type: text/html
+Content-Length: 193
+Connection: keep-alive
+Location: https://publicobject.com/helloworld.txt
+
+INFO: Sending request https://publicobject.com/helloworld.txt on Connection{publicobject.com:443, proxy=DIRECT hostAddress=54.187.32.157 cipherSuite=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA protocol=http/1.1}
+User-Agent: OkHttp Example
+Host: publicobject.com
+Connection: Keep-Alive
+Accept-Encoding: gzip
+
+INFO: Received response for https://publicobject.com/helloworld.txt in 80.9ms
+Server: nginx/1.4.6 (Ubuntu)
+Content-Type: text/plain
+Content-Length: 1759
+Connection: keep-alive
+</code></pre><p>The network requests also contain more data, such as the <code>Accept-Encoding: gzip</code> header added by OkHttp to advertise support for response compression. The network interceptor’s <code>Chain</code> has a non-null <code>Connection</code> that can be used to interrogate the IP address and TLS configuration that were used to connect to the webserver.</p>
+<p>网络请求也包含更多的数据,如 <code>Accept-Encoding: gzip</code> 头信息, OkHttp添加该头信息来通知并支持响应的压缩。网络拦截器链有一个非空连接,可用于查询用于连接到网络服务器的IP地址和TLS配置。</p>
+<h2 id="Choosing-between-application-and-network-interceptors-在应用和网络拦截器之间做选择"><a href="#Choosing-between-application-and-network-interceptors-在应用和网络拦截器之间做选择" class="headerlink" title="Choosing between application and network interceptors 在应用和网络拦截器之间做选择"></a>Choosing between application and network interceptors 在应用和网络拦截器之间做选择</h2><p>Each interceptor chain has relative merits.</p>
+<p>每个拦截器链都有自己的优点.</p>
+<h3 id="Application-interceptors"><a href="#Application-interceptors" class="headerlink" title="Application interceptors"></a>Application interceptors</h3><ul>
+<li>Don’t need to worry about intermediate responses like redirects and retries.</li>
+<li>Are always invoked once, even if the HTTP response is served from the cache.</li>
+<li>Observe the application’s original intent. Unconcerned with OkHttp-injected headers like <code>If-None-Match</code>.</li>
+<li>Permitted to short-circuit and not call <code>Chain.proceed()</code>.</li>
+<li>Permitted to retry and make multiple calls to <code>Chain.proceed()</code>.</li>
+</ul>
+<h3 id="应用拦截器"><a href="#应用拦截器" class="headerlink" title="应用拦截器"></a>应用拦截器</h3><ul>
+<li>不需要担心中间过程的响应,如重定向和重试.</li>
+<li>总是只调用一次,即使HTTP响应是从缓存中获取.</li>
+<li>观察应用程序的初衷. 不关心OkHttp注入的头信息如: <code>If-None-Match</code>.</li>
+<li>允许短路而不调用 <code>Chain.proceed()</code>,即中止调用.</li>
+<li>允许重试,使 <code>Chain.proceed()</code>调用多次.</li>
+</ul>
+<h3 id="Network-Interceptors"><a href="#Network-Interceptors" class="headerlink" title="Network Interceptors"></a>Network Interceptors</h3><ul>
+<li>Able to operate on intermediate responses like redirects and retries.</li>
+<li>Not invoked for cached responses that short-circuit the network.</li>
+<li>Observe the data just as it will be transmitted over the network.</li>
+<li>Access to the <code>Connection</code> that carries the request.</li>
+</ul>
+<h3 id="网络拦截器"><a href="#网络拦截器" class="headerlink" title="网络拦截器"></a>网络拦截器</h3><ul>
+<li>能够操作中间过程的响应,如重定向和重试.</li>
+<li>当网络短路而返回缓存响应时不被调用.</li>
+<li>只观察在网络上传输的数据.</li>
+<li>携带请求来访问连接.</li>
+</ul>
+<h2 id="Rewriting-Requests-重写请求"><a href="#Rewriting-Requests-重写请求" class="headerlink" title="Rewriting Requests 重写请求"></a>Rewriting Requests 重写请求</h2><p>Interceptors can add, remove, or replace request headers. They can also transform the body of those requests that have one. For example, you can use an application interceptor to add request body compression if you’re connecting to a webserver known to support it.</p>
+<p>拦截器可以添加、删除或替换请求头信息.他们还可以改变的请求携带的实体.例如, 如果你连接到一个支持压缩的网络服务器你可以使用一个应用拦截器来添加请求实体压缩.</p>
+<pre><code>/** This interceptor compresses the HTTP request body. Many webservers can&apos;t handle this! */
+/** 这个拦截器压缩了请求实体. 很多网络服务器无法处理它 */
+final class GzipRequestInterceptor implements Interceptor {
+  @Override public Response intercept(Interceptor.Chain chain) throws IOException {
+    Request originalRequest = chain.request();
+    if (originalRequest.body() == null || originalRequest.header(&quot;Content-Encoding&quot;) != null) {
+      return chain.proceed(originalRequest);
+    }
+
+    Request compressedRequest = originalRequest.newBuilder()
+        .header(&quot;Content-Encoding&quot;, &quot;gzip&quot;)
+        .method(originalRequest.method(), gzip(originalRequest.body()))
+        .build();
+    return chain.proceed(compressedRequest);
+  }
+
+  private RequestBody gzip(final RequestBody body) {
+    return new RequestBody() {
+      @Override public MediaType contentType() {
+        return body.contentType();
+      }
+
+      @Override public long contentLength() {
+        return -1; // We don&apos;t know the compressed length in advance!
+      }
+
+      @Override public void writeTo(BufferedSink sink) throws IOException {
+        BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
+        body.writeTo(gzipSink);
+        gzipSink.close();
+      }
+    };
+  }
+}
+</code></pre><h2 id="Rewriting-Responses-重写响应"><a href="#Rewriting-Responses-重写响应" class="headerlink" title="Rewriting Responses 重写响应"></a>Rewriting Responses 重写响应</h2><p>Symmetrically, interceptors can rewrite response headers and transform the response body. This is generally more dangerous than rewriting request headers because it may violate the webserver’s expectations!</p>
+<p>与重写请求对称,拦截器可以重写响应头信息和改变响应实体.这通常比重写请求头信息更加危险,因为它可能违反网络服务器的期望!</p>
+<p>If you’re in a tricky situation and prepared to deal with the consequences, rewriting response headers is a powerful way to work around problems. For example, you can fix a server’s misconfigured <code>Cache-Control</code> response header to enable better response caching:</p>
+<p>如果你在一个棘手的情况下,准备处理结果,重写响应头信息是一种强大的解决问题的方式.例如,您可以修复一个服务器配置错误的 <code>Cache-Control</code> 响应头信息,来确保更好的响应缓存:</p>
+<pre><code>/** Dangerous interceptor that rewrites the server&apos;s cache-control header. */
+/** 重写服务器 cache-control 头信息的拦截器是危险的. */
+private static final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = new Interceptor() {
+  @Override public Response intercept(Interceptor.Chain chain) throws IOException {
+    Response originalResponse = chain.proceed(chain.request());
+    return originalResponse.newBuilder()
+        .header(&quot;Cache-Control&quot;, &quot;max-age=60&quot;)
+        .build();
+  }
+};
+</code></pre><p>Typically this approach works best when it complements a corresponding fix on the webserver!</p>
+<p>通常这种方法最好实现在相应的网络服务器上!</p>
+<h2 id="Availability-可用性"><a href="#Availability-可用性" class="headerlink" title="Availability 可用性"></a>Availability 可用性</h2><p>OkHttp’s interceptors require OkHttp 2.2 or better. Unfortunately, interceptors do not work with <code>OkUrlFactory</code>, or the libraries that build on it, including <a href="http://square.github.io/retrofit/" target="_blank" rel="external">Retrofit</a> ≤ 1.8 and <a href="http://square.github.io/picasso/" target="_blank" rel="external">Picasso</a> ≤ 2.4.</p>
+<p>OkHttp的拦截器需要OkHttp 2.2或以上.不幸的是,拦截器不能和 <code>OkUrlFactory</code>同时工作,或其他库的构建,包括 <a href="http://square.github.io/retrofit/" target="_blank" rel="external">Retrofit</a> ≤ 1.8和 <a href="http://square.github.io/picasso/" target="_blank" rel="external">Picasso</a> ≤ 2.4.</p>
+<hr>
+<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
+<ol>
+<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
+<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
+<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
+<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
+<li>Okhttp-wiki 之 Interceptors 拦截器</li>
+<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Okhttp/" rel="tag">#Okhttp</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/11/OkHttp/" rel="next" title="Okhttp">
+                <i class="fa fa-chevron-left"></i> Okhttp
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/11/HTTPS/" rel="prev" title="Okhttp-wiki 之 HTTPS">
+                Okhttp-wiki 之 HTTPS <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/03/11/Interceptors/"
+           data-title="Okhttp-wiki 之 Interceptors 拦截器" data-url="http://yoursite.com/2016/03/11/Interceptors/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/焉逢(皇甫朝云).jpg"
+               alt="汉之风云" />
+          <p class="site-author-name" itemprop="name">汉之风云</p>
+          <p class="site-description motion-element" itemprop="description">活着 开心就好</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hanzhifengyun" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/hanzhifengyun" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.sunlianshuang.com" title="John Sun" target="_blank">John Sun</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Okhttp-wiki-之-Interceptors-拦截器"><span class="nav-number">1.</span> <span class="nav-text">Okhttp-wiki 之 Interceptors 拦截器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Application-Interceptors-应用拦截器"><span class="nav-number">1.1.</span> <span class="nav-text">Application Interceptors 应用拦截器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Network-Interceptors-网络拦截器"><span class="nav-number">1.2.</span> <span class="nav-text">Network Interceptors 网络拦截器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Choosing-between-application-and-network-interceptors-在应用和网络拦截器之间做选择"><span class="nav-number">1.3.</span> <span class="nav-text">Choosing between application and network interceptors 在应用和网络拦截器之间做选择</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Application-interceptors"><span class="nav-number">1.3.1.</span> <span class="nav-text">Application interceptors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#应用拦截器"><span class="nav-number">1.3.2.</span> <span class="nav-text">应用拦截器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Network-Interceptors"><span class="nav-number">1.3.3.</span> <span class="nav-text">Network Interceptors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#网络拦截器"><span class="nav-number">1.3.4.</span> <span class="nav-text">网络拦截器</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rewriting-Requests-重写请求"><span class="nav-number">1.4.</span> <span class="nav-text">Rewriting Requests 重写请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rewriting-Responses-重写响应"><span class="nav-number">1.5.</span> <span class="nav-text">Rewriting Responses 重写响应</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Availability-可用性"><span class="nav-number">1.6.</span> <span class="nav-text">Availability 可用性</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">汉之风云</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"hanzhifengyun"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

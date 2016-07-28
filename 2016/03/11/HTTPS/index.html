@@ -1,0 +1,825 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Okhttp," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Okhttp-wiki 之 HTTPSOkHttp attempts to balance two competing concerns:
+
+Connectivity to as many hosts as possible. That includes advanced hosts that run the latest versions of boringssl and less out of">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Okhttp-wiki 之 HTTPS">
+<meta property="og:url" content="http://yoursite.com/2016/03/11/HTTPS/index.html">
+<meta property="og:site_name" content="汉之风云">
+<meta property="og:description" content="Okhttp-wiki 之 HTTPSOkHttp attempts to balance two competing concerns:
+
+Connectivity to as many hosts as possible. That includes advanced hosts that run the latest versions of boringssl and less out of">
+<meta property="og:updated_time" content="2016-07-28T07:29:03.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Okhttp-wiki 之 HTTPS">
+<meta name="twitter:description" content="Okhttp-wiki 之 HTTPSOkHttp attempts to balance two competing concerns:
+
+Connectivity to as many hosts as possible. That includes advanced hosts that run the latest versions of boringssl and less out of">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/03/11/HTTPS/"/>
+
+  <title> Okhttp-wiki 之 HTTPS | 汉之风云 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=57651172";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">汉之风云</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Okhttp-wiki 之 HTTPS
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-03-11T10:51:52+08:00" content="2016-03-11">
+              2016-03-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Okhttp/" itemprop="url" rel="index">
+                    <span itemprop="name">Okhttp</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/03/11/HTTPS/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/11/HTTPS/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Okhttp-wiki-之-HTTPS"><a href="#Okhttp-wiki-之-HTTPS" class="headerlink" title="Okhttp-wiki 之 HTTPS"></a>Okhttp-wiki 之 HTTPS</h1><p>OkHttp attempts to balance two competing concerns:</p>
+<ul>
+<li><strong>Connectivity</strong> to as many hosts as possible. That includes advanced hosts that run the latest versions of <a href="https://boringssl.googlesource.com/boringssl/" target="_blank" rel="external">boringssl</a> and less out of date hosts running older versions of <a href="https://www.openssl.org/" target="_blank" rel="external">OpenSSL</a>.</li>
+<li><strong>Security</strong> of the connection. This includes verification of the remote webserver with certificates and the privacy of data exchanged with strong ciphers.</li>
+</ul>
+<p>OkHttp试图平衡下面两者之间的矛盾关系:</p>
+<ul>
+<li>尽可能多的主机连接.这包括运行最新版本先进的<a href="https://boringssl.googlesource.com/boringssl/" target="_blank" rel="external">boringssl</a>主机和运行旧版本过时的<a href="https://www.openssl.org/" target="_blank" rel="external">OpenSSL</a>主机.</li>
+<li>连接安全.这包括远程网络服务器证书的验证和用很强的密码交换数据的隐私.</li>
+</ul>
+<p>When negotiating a connection to an HTTPS server, OkHttp needs to know which <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/TlsVersion.html" target="_blank" rel="external">TLS versions</a> and <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CipherSuite.html" target="_blank" rel="external">cipher suites</a> to offer. A client that wants to maximize connectivity would include obsolete TLS versions and weak-by-design cipher suites. A strict client that wants to maximize security would be limited to only the latest TLS version and strongest cipher suites.</p>
+<p>当判断一个连接到HTTPS服务器的连接,OkHttp需要知道是哪个TLS版本和提供的密码组合.客户端想要最大化连接将包括过时的TLS版本和很弱的密码套件.一个严谨的客户希望最大化安全将仅限于最新的TLS版本和最强的密码组合.</p>
+<p>Specific security vs. connectivity decisions are implemented by <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionSpec.html" target="_blank" rel="external">ConnectionSpec</a>. OkHttp includes three built-in connection specs:</p>
+<ul>
+<li><code>MODERN_TLS</code> is a secure configuration that connects to modern HTTPS servers.</li>
+<li><code>COMPATIBLE_TLS</code> is a secure configuration that connects to secure–but not current–HTTPS servers.</li>
+<li><code>CLEARTEXT</code> is an insecure configuration that is used for <code>http://</code> URLs.</li>
+</ul>
+<p>特定的安全与决定连接是由<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionSpec.html" target="_blank" rel="external">ConnectionSpec</a>实现.OkHttp包含三个内置的连接标准:</p>
+<ul>
+<li><code>MODERN_TLS</code> 是一个安全的配置,连接到现有服务器.</li>
+<li><code>COMPATIBLE_TLS</code>  是一个安全的配置,连接到安全的但不是现有服务器.</li>
+<li><code>CLEARTEXT</code> 是一个不安全的配置, 用于 http:// 的URLs.</li>
+</ul>
+<p>By default, OkHttp will attempt a <code>MODERN_TLS</code> connection, and fall back to <code>COMPATIBLE_TLS</code> connection if the modern configuration fails.</p>
+<p>默认情况下,OkHttp将尝试 <code>MODERN_TLS</code> 连接,如果现有配置失败则回退至 <code>COMPATIBLE_TLS</code> 连接.</p>
+<p>The TLS versions and cipher suites in each spec can change with each release. For example, in OkHttp 2.2 we dropped support for SSL 3.0 in response to the <a href="http://googleonlinesecurity.blogspot.ca/2014/10/this-poodle-bites-exploiting-ssl-30.html" target="_blank" rel="external">POODLE</a> attack. And in OkHttp 2.3 we dropped support for <a href="http://en.wikipedia.org/wiki/RC4#Security" target="_blank" rel="external">RC4</a>. As with your desktop web browser, staying up-to-date with OkHttp is the best way to stay secure.</p>
+<p>TLS版本和密码组合在每个规格下可以改变每个版本.例如,OkHttp 2.2我们为 <a href="http://googleonlinesecurity.blogspot.ca/2014/10/this-poodle-bites-exploiting-ssl-30.html" target="_blank" rel="external">POODLE</a> 攻击向下兼容支持SSL3.0;我们在OkHttp 2.3向下兼容支持 <a href="http://en.wikipedia.org/wiki/RC4#Security" target="_blank" rel="external">RC4</a>.与桌面浏览器相同,保持安全最好的办法是保持OkHttp是最新的.</p>
+<p>You can build your own connection spec with a custom set of TLS versions and cipher suites. For example, this configuration is limited to three highly-regarded cipher suites. Its drawback is that it requires Android 5.0+ and a similarly current webserver.</p>
+<p>你也可以建立自己的连接规范带有一套定制的TLS版本和密码套件.例如,这个配置仅限于三个主要的密码组合.它的缺点是它需要Android 5.0+和相似的现有网络服务器.</p>
+<pre><code>ConnectionSpec spec = new ConnectionSpec.Builder(ConnectionSpec.MODERN_TLS)  
+    .tlsVersions(TlsVersion.TLS_1_2)
+    .cipherSuites(
+          CipherSuite.TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+          CipherSuite.TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,
+          CipherSuite.TLS_DHE_RSA_WITH_AES_128_GCM_SHA256)
+    .build();
+
+OkHttpClient client = new OkHttpClient.Builder() 
+    .connectionSpecs(Collections.singletonList(spec))
+    .build();
+</code></pre><h2 id="Certificate-Pinning-证书锁定"><a href="#Certificate-Pinning-证书锁定" class="headerlink" title="Certificate Pinning 证书锁定"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CertificatePinning.java" target="_blank" rel="external">Certificate Pinning 证书锁定</a></h2><p>By default, OkHttp trusts the certificate authorities of the host platform. This strategy maximizes connectivity, but it is subject to certificate authority attacks such as the <a href="http://www.computerworld.com/article/2510951/cybercrime-hacking/hackers-spied-on-300-000-iranians-using-fake-google-certificate.html" target="_blank" rel="external">2011 DigiNotar attack</a>. It also assumes your HTTPS servers’ certificates are signed by a certificate authority.</p>
+<p>默认情况下,OkHttp信任主机平台的认证中心.这一策略最大化连接,但受制于<a href="http://www.computerworld.com/article/2510951/cybercrime-hacking/hackers-spied-on-300-000-iranians-using-fake-google-certificate.html" target="_blank" rel="external">2011 DigiNotar attack</a>等认证授权攻击.它还假定HTTPS服务器的证书已经被认证中心签约.</p>
+<p>Use <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CertificatePinner.html" target="_blank" rel="external">CertificatePinner</a> to constrain which certificate authorities are trusted. Certificate pinning increases security, but limits your server team’s abilities to update their TLS certificates. <strong>Do not use certificate pinning without the blessing of your server’s TLS administrator!</strong></p>
+<p>使用 <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CertificatePinner.html" target="_blank" rel="external">CertificatePinner</a> 约束所信任的认证中心.证书锁定将增加安全性,但受制于服务器团队的能力来更新他们的TLS证书.<strong>不要在没有通知使用你的服务器的TLS管理员的情况下使用证书锁定!</strong></p>
+<pre><code>public CertificatePinning() {
+  client = new OkHttpClient.Builder()
+      .certificatePinner(new CertificatePinner.Builder()
+          .add(&quot;publicobject.com&quot;, &quot;sha1/DmxUShsZuNiqPQsX2Oi9uv2sCnw=&quot;)
+          .add(&quot;publicobject.com&quot;, &quot;sha1/SXxoaOSEzPC6BgGmxAt/EAcsajw=&quot;)
+          .add(&quot;publicobject.com&quot;, &quot;sha1/blhOM3W9V/bVQhsWAcLYwPU6n24=&quot;)
+          .add(&quot;publicobject.com&quot;, &quot;sha1/T5x9IXmcrQ7YuQxXnxoCmeeQ84c=&quot;)
+          .build())
+      .build();
+}
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;https://publicobject.com/robots.txt&quot;)
+      .build();
+
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  for (Certificate certificate : response.handshake().peerCertificates()) {
+    System.out.println(CertificatePinner.pin(certificate));
+  }
+}
+</code></pre><h2 id="Customizing-Trusted-Certificates-定制被信任的证书"><a href="#Customizing-Trusted-Certificates-定制被信任的证书" class="headerlink" title="Customizing Trusted Certificates 定制被信任的证书"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CustomTrust.java" target="_blank" rel="external">Customizing Trusted Certificates 定制被信任的证书</a></h2><p>The full code sample shows how to replace the host platform’s certificate authorities with your own set. As above, <strong>do not use custom certificates without the blessing of your server’s TLS administrator!</strong></p>
+<p>完整的代码示例展示了如何用你自己的设置替换主机平台的认证中心.<strong>不要在没有通知使用你的服务器的TLS管理员的情况下定制证书!</strong></p>
+<pre><code>private final OkHttpClient client;
+
+public CustomTrust() {
+  SSLContext sslContext = sslContextForTrustedCertificates(trustedCertificatesInputStream());
+  client = new OkHttpClient.Builder()
+      .sslSocketFactory(sslContext.getSocketFactory())
+      .build();
+}
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;https://publicobject.com/helloworld.txt&quot;)
+      .build();
+
+  Response response = client.newCall(request).execute();
+  System.out.println(response.body().string());
+}
+
+private InputStream trustedCertificatesInputStream() {
+  ... // Full source omitted. See sample.
+      // 详细代码请看官方sample,点击标题链接进入
+}
+
+public SSLContext sslContextForTrustedCertificates(InputStream in) {
+  ... // Full source omitted. See sample.
+}
+</code></pre><hr>
+<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
+<ol>
+<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
+<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
+<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
+<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
+<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
+<li>Okhttp-wiki 之 HTTPS</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Okhttp/" rel="tag">#Okhttp</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/03/11/Interceptors/" rel="next" title="Okhttp-wiki 之 Interceptors 拦截器">
+                <i class="fa fa-chevron-left"></i> Okhttp-wiki 之 Interceptors 拦截器
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/11/Connections/" rel="prev" title="Okhttp-wiki 之 Connections 连接">
+                Okhttp-wiki 之 Connections 连接 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/03/11/HTTPS/"
+           data-title="Okhttp-wiki 之 HTTPS" data-url="http://yoursite.com/2016/03/11/HTTPS/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/焉逢(皇甫朝云).jpg"
+               alt="汉之风云" />
+          <p class="site-author-name" itemprop="name">汉之风云</p>
+          <p class="site-description motion-element" itemprop="description">活着 开心就好</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hanzhifengyun" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/hanzhifengyun" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.sunlianshuang.com" title="John Sun" target="_blank">John Sun</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Okhttp-wiki-之-HTTPS"><span class="nav-number">1.</span> <span class="nav-text">Okhttp-wiki 之 HTTPS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Certificate-Pinning-证书锁定"><span class="nav-number">1.1.</span> <span class="nav-text">Certificate Pinning 证书锁定</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Customizing-Trusted-Certificates-定制被信任的证书"><span class="nav-number">1.2.</span> <span class="nav-text">Customizing Trusted Certificates 定制被信任的证书</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">汉之风云</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"hanzhifengyun"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

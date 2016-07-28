@@ -1,0 +1,1133 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Okhttp," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.1" />
+
+
+
+
+
+
+<meta name="description" content="Okhttp-wiki 之 Recipes 秘诀(食谱)We’ve written some recipes that demonstrate how to solve common problems with OkHttp. Read through them to learn about how everything works together. Cut-and-paste these ex">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Okhttp-wiki 之 Recipes 秘诀(食谱)">
+<meta property="og:url" content="http://yoursite.com/2016/03/11/Recipes/index.html">
+<meta property="og:site_name" content="汉之风云">
+<meta property="og:description" content="Okhttp-wiki 之 Recipes 秘诀(食谱)We’ve written some recipes that demonstrate how to solve common problems with OkHttp. Read through them to learn about how everything works together. Cut-and-paste these ex">
+<meta property="og:updated_time" content="2016-07-28T07:28:04.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Okhttp-wiki 之 Recipes 秘诀(食谱)">
+<meta name="twitter:description" content="Okhttp-wiki 之 Recipes 秘诀(食谱)We’ve written some recipes that demonstrate how to solve common problems with OkHttp. Read through them to learn about how everything works together. Cut-and-paste these ex">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"post"},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: 0,
+      author: '博主'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/03/11/Recipes/"/>
+
+  <title> Okhttp-wiki 之 Recipes 秘诀(食谱) | 汉之风云 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//tajs.qq.com/stats?sId=57651172";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">汉之风云</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle"></p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Okhttp-wiki 之 Recipes 秘诀(食谱)
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-03-11T10:51:52+08:00" content="2016-03-11">
+              2016-03-11
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Okhttp/" itemprop="url" rel="index">
+                    <span itemprop="name">Okhttp</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/03/11/Recipes/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/11/Recipes/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+              &nbsp; | &nbsp;
+              <span class="page-pv"><i class="fa fa-file-o"></i>
+              <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>
+              </span>
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="Okhttp-wiki-之-Recipes-秘诀-食谱"><a href="#Okhttp-wiki-之-Recipes-秘诀-食谱" class="headerlink" title="Okhttp-wiki 之 Recipes 秘诀(食谱)"></a>Okhttp-wiki 之 Recipes 秘诀(食谱)</h1><p>We’ve written some recipes that demonstrate how to solve common problems with OkHttp. Read through them to learn about how everything works together. Cut-and-paste these examples freely; that’s what they’re for.</p>
+<p>我们写了一些秘诀来演示OkHttp如何解决常见问题。通读他们了解在一起做的任何事情。你可以自由复制粘贴这些例子;这就是他们的目的。</p>
+<h2 id="Synchronous-同步的-Get"><a href="#Synchronous-同步的-Get" class="headerlink" title="Synchronous (同步的) Get"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/SynchronousGet.java" target="_blank" rel="external">Synchronous (同步的) Get</a></h2><p>Download a file, print its headers, and print its response body as a string.</p>
+<p>下载一个文件,打印头信息,打印其响应实体为字符串。</p>
+<p>The <code>string()</code> method on response body is convenient and efficient for small documents. But if the response body is large (greater than 1 MiB), avoid <code>string()</code> because it will load the entire document into memory. In that case, prefer to process the body as a stream.</p>
+<p>对小文件来说<code>string()</code>方法响应实体是方便和高效的.但如果响应实体很大(大于1 MiB),避免使用<code>string()</code>,因为它会将整个文档加载到内存中.在这种情况下,更倾向于用流处理实体.</p>
+<pre><code>private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;http://publicobject.com/helloworld.txt&quot;)
+      .build();
+
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  Headers responseHeaders = response.headers();
+  for (int i = 0; i &lt; responseHeaders.size(); i++) {
+    System.out.println(responseHeaders.name(i) + &quot;: &quot; + responseHeaders.value(i));
+  }
+
+  System.out.println(response.body().string());
+}
+</code></pre><h2 id="Asynchronous-异步的-Get"><a href="#Asynchronous-异步的-Get" class="headerlink" title="Asynchronous (异步的) Get"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/AsynchronousGet.java" target="_blank" rel="external">Asynchronous (异步的) Get</a></h2><p>Download a file on a worker thread, and get called back when the response is readable. The callback is made after the response headers are ready. Reading the response body may still block. OkHttp doesn’t currently offer asynchronous APIs to receive a response body in parts.</p>
+<p>在工作线程下载一个文件,在响应可读时获得回调.回调被创建意味着响应头信息准备好了。读取响应主体可能阻塞线程。OkHttp当前不具备异步api来获得响应的实体部分。</p>
+<pre><code>private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;http://publicobject.com/helloworld.txt&quot;)
+      .build();
+
+  client.newCall(request).enqueue(new Callback() {
+    @Override public void onFailure(Request request, IOException throwable) {
+      throwable.printStackTrace();
+    }
+
+    @Override public void onResponse(Response response) throws IOException {
+      if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+      Headers responseHeaders = response.headers();
+      for (int i = 0; i &lt; responseHeaders.size(); i++) {
+        System.out.println(responseHeaders.name(i) + &quot;: &quot; + responseHeaders.value(i));
+      }
+
+      System.out.println(response.body().string());
+    }
+  });
+}
+</code></pre><h2 id="Accessing-Headers-访问头信息"><a href="#Accessing-Headers-访问头信息" class="headerlink" title="Accessing Headers 访问头信息"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/AccessHeaders.java" target="_blank" rel="external">Accessing Headers 访问头信息</a></h2><p>Typically HTTP headers work like a <code>Map&lt;String, String&gt;</code>: each field has one value or none. But some headers permit multiple values, like Guava’s <a href="http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/collect/Multimap.html" target="_blank" rel="external">Multimap</a>. For example, it’s legal and common for an HTTP response to supply multiple <code>Vary</code> headers. OkHttp’s APIs attempt to make both cases comfortable.</p>
+<p>典型的HTTP头信息的工作像一个<code>Map&lt;String, String&gt;</code>:每个字段都有一个值或没有.但是一些头信息允许多个值,如 Guava’s <a href="http://docs.guava-libraries.googlecode.com/git/javadoc/com/google/common/collect/Multimap.html" target="_blank" rel="external">Multimap</a>.例如,一个HTTP响应提供多个不同的头信息是合法和常见的.OkHttp’s APIs试图使这两种情况下都方便使用.</p>
+<p>When writing request headers, use <code>header(name, value)</code> to set the only occurrence of <code>name</code> to <code>value</code>. If there are existing values, they will be removed before the new value is added. Use <code>addHeader(name, value)</code> to add a header without removing the headers already present.</p>
+<p>当写请求头信息时,使用<code>header(name, value)</code>为<code>value</code>设置唯一的<code>name</code>.如果values已经存在,他们将被删除然后添加的新<code>value</code>.使用<code>addHeader(name, value)</code>来添加一个新的头信息而不需要移除已经存在的头信息.</p>
+<p>When reading response a header, use <code>header(name)</code> to return the last occurrence of the named value. Usually this is also the only occurrence! If no value is present, <code>header(name)</code> will return null. To read all of a field’s values as a list, use <code>headers(name)</code>.</p>
+<p>当读响应头信息时,使用<code>header(name)</code>返回最后出现的命名值。通常这也是唯一事件!如果没有<code>value</code>存在,<code>header(name)</code>将返回<code>null</code>.阅读所有字段的值列表,使用<code>headers(name)</code>.</p>
+<p>To visit all headers, use the <code>Headers</code> class which supports access by index.</p>
+<p>访问所有的头信息,使用<code>Headers</code>类支持通过索引访问.</p>
+<pre><code>private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;https://api.github.com/repos/square/okhttp/issues&quot;)
+      .header(&quot;User-Agent&quot;, &quot;OkHttp Headers.java&quot;)
+      .addHeader(&quot;Accept&quot;, &quot;application/json; q=0.5&quot;)
+      .addHeader(&quot;Accept&quot;, &quot;application/vnd.github.v3+json&quot;)
+      .build();
+
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  System.out.println(&quot;Server: &quot; + response.header(&quot;Server&quot;));
+  System.out.println(&quot;Date: &quot; + response.header(&quot;Date&quot;));
+  System.out.println(&quot;Vary: &quot; + response.headers(&quot;Vary&quot;));
+}
+</code></pre><h2 id="Posting-a-String-上传字符串"><a href="#Posting-a-String-上传字符串" class="headerlink" title="Posting a String 上传字符串"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostString.java" target="_blank" rel="external">Posting a String 上传字符串</a></h2><p>Use an HTTP POST to send a request body to a service. This example posts a markdown document to a web service that renders markdown as HTML. Because the entire request body is in memory simultaneously, avoid posting large (greater than 1 MiB) documents using this API.</p>
+<p>使用一个HTTP POST发送请求实体到服务.这个例子提交一个markdown文档发送给web服务,将markdown呈现为HTML.因为整个请求实体同时在内存中,避免使用这个API发布大文档(大于1 MiB).</p>
+<pre><code>public static final MediaType MEDIA_TYPE_MARKDOWN
+    = MediaType.parse(&quot;text/x-markdown; charset=utf-8&quot;);
+
+private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  String postBody = &quot;&quot;
+      + &quot;Releases\n&quot;
+      + &quot;--------\n&quot;
+      + &quot;\n&quot;
+      + &quot; * _1.0_ May 6, 2013\n&quot;
+      + &quot; * _1.1_ June 15, 2013\n&quot;
+      + &quot; * _1.2_ August 11, 2013\n&quot;;
+
+  Request request = new Request.Builder()
+      .url(&quot;https://api.github.com/markdown/raw&quot;)
+      .post(RequestBody.create(MEDIA_TYPE_MARKDOWN, postBody))
+      .build();
+
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  System.out.println(response.body().string());
+}
+</code></pre><h2 id="Post-Streaming-上传流"><a href="#Post-Streaming-上传流" class="headerlink" title="Post Streaming 上传流"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostStreaming.java" target="_blank" rel="external">Post Streaming 上传流</a></h2><p>Here we <code>POST</code> a request body as a stream. The content of this request body is being generated as it’s being written. This example streams directly into the <a href="https://github.com/square/okio" target="_blank" rel="external">Okio</a> buffered sink. Your programs may prefer an OutputStream, which you can get from BufferedSink.outputStream().</p>
+<p>这里我们发布一个请求实体作为一个流. 这个请求实体被写的时候它的内容就产生了.这个例子的流直接进入到 <a href="https://github.com/square/okio" target="_blank" rel="external">Okio</a> 缓冲池.你的项目可能更喜欢一个<code>OutputStream</code>,你可以从<code>BufferedSink.outputStream()</code>获取.</p>
+<pre><code>public static final MediaType MEDIA_TYPE_MARKDOWN
+    = MediaType.parse(&quot;text/x-markdown; charset=utf-8&quot;);
+
+private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  RequestBody requestBody = new RequestBody() {
+    @Override public MediaType contentType() {
+      return MEDIA_TYPE_MARKDOWN;
+    }
+
+    @Override public void writeTo(BufferedSink sink) throws IOException {
+      sink.writeUtf8(&quot;Numbers\n&quot;);
+      sink.writeUtf8(&quot;-------\n&quot;);
+      for (int i = 2; i &lt;= 997; i++) {
+        sink.writeUtf8(String.format(&quot; * %s = %s\n&quot;, i, factor(i)));
+      }
+    }
+
+    private String factor(int n) {
+      for (int i = 2; i &lt; n; i++) {
+        int x = n / i;
+        if (x * i == n) return factor(x) + &quot; × &quot; + i;
+      }
+      return Integer.toString(n);
+    }
+  };
+
+  Request request = new Request.Builder()
+      .url(&quot;https://api.github.com/markdown/raw&quot;)
+      .post(requestBody)
+      .build();
+
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  System.out.println(response.body().string());
+}
+</code></pre><h2 id="Posting-a-File-上传文件"><a href="#Posting-a-File-上传文件" class="headerlink" title="Posting a File 上传文件"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostFile.java" target="_blank" rel="external">Posting a File 上传文件</a></h2><p>It’s easy to use a file as a request body.</p>
+<p>很容易使用一个文件作为请求实体.</p>
+<pre><code>public static final MediaType MEDIA_TYPE_MARKDOWN
+    = MediaType.parse(&quot;text/x-markdown; charset=utf-8&quot;);
+
+private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  File file = new File(&quot;README.md&quot;);
+
+  Request request = new Request.Builder()
+      .url(&quot;https://api.github.com/markdown/raw&quot;)
+      .post(RequestBody.create(MEDIA_TYPE_MARKDOWN, file))
+      .build();
+
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  System.out.println(response.body().string());
+}
+</code></pre><h2 id="Posting-form-parameters-上传表格参数"><a href="#Posting-form-parameters-上传表格参数" class="headerlink" title="Posting form parameters 上传表格参数"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostForm.java" target="_blank" rel="external">Posting form parameters 上传表格参数</a></h2><p>Use <code>FormBody.Builder</code> to build a request body that works like an HTML <code>&lt;form&gt;</code> tag. Names and values will be encoded using an HTML-compatible form URL encoding.</p>
+<p>使用<code>FormBody.Builder</code>构建请求实体工作起来就像一个HTML<code>&lt;form&gt;</code> 标签。名称和值将使用一种 HTML-compatible 的URL编码。</p>
+<pre><code>private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  RequestBody formBody = new FormBody.Builder()
+      .add(&quot;search&quot;, &quot;Jurassic Park&quot;)
+      .build();
+  Request request = new Request.Builder()
+      .url(&quot;https://en.wikipedia.org/w/index.php&quot;)
+      .post(formBody)
+      .build();
+
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  System.out.println(response.body().string());
+}
+</code></pre><h2 id="Posting-a-multipart-request-上传多部分的请求"><a href="#Posting-a-multipart-request-上传多部分的请求" class="headerlink" title="Posting a multipart request 上传多部分的请求"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PostMultipart.java" target="_blank" rel="external">Posting a multipart request 上传多部分的请求</a></h2><p><code>MultipartBody.Builder</code> can build sophisticated request bodies compatible with HTML file upload forms. Each part of a multipart request body is itself a request body, and can define its own headers. If present, these headers should describe the part body, such as its <code>Content-Disposition</code>. The <code>Content-Length</code> and <code>Content-Type</code> headers are added automatically if they’re available.</p>
+<p><code>MultipartBody.Builder</code> 可以构建兼容HTML文件上传表单的复杂的请求实体。一个多部分请求的每个部分本身就是一个请求实体,并可以定义自己的头信息。如果存在的话,这些头信息应该描述该部分实体,比如它的内容目录.内容长度和内容类型的头信息如果可用的话会自动添加。</p>
+<pre><code>private static final String IMGUR_CLIENT_ID = &quot;...&quot;;
+private static final MediaType MEDIA_TYPE_PNG = MediaType.parse(&quot;image/png&quot;);
+
+private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  // Use the imgur image upload API as documented at https://api.imgur.com/endpoints/image
+  RequestBody requestBody = new MultipartBody.Builder()
+      .setType(MultipartBody.FORM)
+      .addFormDataPart(&quot;title&quot;, &quot;Square Logo&quot;)
+      .addFormDataPart(&quot;image&quot;, &quot;logo-square.png&quot;,
+          RequestBody.create(MEDIA_TYPE_PNG, new File(&quot;website/static/logo-square.png&quot;)))
+      .build();
+
+  Request request = new Request.Builder()
+      .header(&quot;Authorization&quot;, &quot;Client-ID &quot; + IMGUR_CLIENT_ID)
+      .url(&quot;https://api.imgur.com/3/image&quot;)
+      .post(requestBody)
+      .build();
+
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  System.out.println(response.body().string());
+}
+</code></pre><h2 id="Parse-a-JSON-Response-With-Gson-用Gson解析一个JSON响应"><a href="#Parse-a-JSON-Response-With-Gson-用Gson解析一个JSON响应" class="headerlink" title="Parse a JSON Response With Gson 用Gson解析一个JSON响应"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/ParseResponseWithGson.java" target="_blank" rel="external">Parse a JSON Response With Gson 用Gson解析一个JSON响应</a></h2><p><a href="http://code.google.com/p/google-gson/" target="_blank" rel="external">Gson</a> is a handy API for converting between JSON and Java objects. Here we’re using it to decode a JSON response from a GitHub API.</p>
+<p><a href="http://code.google.com/p/google-gson/" target="_blank" rel="external">Gson</a> 是一个方便JSON和Java对象之间互相转换的API.这里我们用它来解析一个来自GitHub API的JSON响应.</p>
+<p>Note that <code>ResponseBody.charStream()</code> uses the <code>Content-Type</code> response header to select which charset to use when decoding the response body. It defaults to <code>UTF-8</code> if no charset is specified.</p>
+<p>注意: 当解析响应实体时 <code>ResponseBody.charStream()</code> 使用 <code>Content-Type</code> 响应头信息来选择字符编码.如果没有指定字符编码则默认为<code>UTF-8</code>.</p>
+<pre><code>private final OkHttpClient client = new OkHttpClient();
+private final Gson gson = new Gson();
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;https://api.github.com/gists/c2a7c39532239ff261be&quot;)
+      .build();
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  Gist gist = gson.fromJson(response.body().charStream(), Gist.class);
+  for (Map.Entry&lt;String, GistFile&gt; entry : gist.files.entrySet()) {
+    System.out.println(entry.getKey());
+    System.out.println(entry.getValue().content);
+  }
+}
+
+static class Gist {
+  Map&lt;String, GistFile&gt; files;
+}
+
+static class GistFile {
+  String content;
+}
+</code></pre><h2 id="Response-Caching-响应缓存"><a href="#Response-Caching-响应缓存" class="headerlink" title="Response Caching 响应缓存"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CacheResponse.java" target="_blank" rel="external">Response Caching 响应缓存</a></h2><p>To cache responses, you’ll need a cache directory that you can read and write to, and a limit on the cache’s size. The cache directory should be private, and untrusted applications should not be able to read its contents!</p>
+<p>为了缓存响应,你需要一个缓存目录,你可以读和写,并限制缓存的大小.缓存目录应该是私有的,不受信任的应用程序不应该能够阅读其内容!</p>
+<p>It is an error to have multiple caches accessing the same cache directory simultaneously. Most applications should call <code>new OkHttpClient()</code> exactly once, configure it with their cache, and use that same instance everywhere. Otherwise the two cache instances will stomp on each other, corrupt the response cache, and possibly crash your program.</p>
+<p>同时有多个缓存访问相同的缓存目录是错误的.大多数应用程序应该只调用 <code>new OkHttpClient()</code> 一次, 配置它们的缓存,并在所有地方使用相同的OkHttpClient实例.否则这两个缓存实例会互相干扰,恶化响应缓存,并可能使程序崩溃.</p>
+<p>Response caching uses HTTP headers for all configuration. You can add request headers like <code>Cache-Control: max-stale=3600</code> and OkHttp’s cache will honor them. Your webserver configures how long responses are cached with its own response headers, like <code>Cache-Control: max-age=9600</code>. There are cache headers to force a cached response, force a network response, or force the network response to be validated with a conditional GET.</p>
+<p>响应缓存为所有配置使用HTTP头信息. 你可以添加请求头信息如 <code>Cache-Control: max-stale=3600</code> 同时OkHttp缓存会使用他们。你的网络服务器配置响应能缓存多久自己的响应头信息,像 <code>Cache-Control: max-age=9600</code>。缓存头信息促使一个缓存的响应,促使一个网络响应,或当一个条件得到验证时促使网络响应。</p>
+<pre><code>private final OkHttpClient client;
+
+public CacheResponse(File cacheDirectory) throws Exception {
+  int cacheSize = 10 * 1024 * 1024; // 10 MiB
+  Cache cache = new Cache(cacheDirectory, cacheSize);
+
+  client = new OkHttpClient.Builder()
+      .cache(cache)
+      .build();
+}
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;http://publicobject.com/helloworld.txt&quot;)
+      .build();
+
+  Response response1 = client.newCall(request).execute();
+  if (!response1.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response1);
+
+  String response1Body = response1.body().string();
+  System.out.println(&quot;Response 1 response:          &quot; + response1);
+  System.out.println(&quot;Response 1 cache response:    &quot; + response1.cacheResponse());
+  System.out.println(&quot;Response 1 network response:  &quot; + response1.networkResponse());
+
+  Response response2 = client.newCall(request).execute();
+  if (!response2.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response2);
+
+  String response2Body = response2.body().string();
+  System.out.println(&quot;Response 2 response:          &quot; + response2);
+  System.out.println(&quot;Response 2 cache response:    &quot; + response2.cacheResponse());
+  System.out.println(&quot;Response 2 network response:  &quot; + response2.networkResponse());
+
+  System.out.println(&quot;Response 2 equals Response 1? &quot; + response1Body.equals(response2Body));
+}
+</code></pre><p>To prevent a response from using the cache, use <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_NETWORK" target="_blank" rel="external"><code>CacheControl.FORCE_NETWORK</code></a>. To prevent it from using the network, use <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_CACHE" target="_blank" rel="external"><code>CacheControl.FORCE_CACHE</code></a>. Be warned: if you use <code>FORCE_CACHE</code> and the response requires the network, OkHttp will return a <code>504 Unsatisfiable Request</code> response.</p>
+<p>防止一个响应使用缓存,只获取网络响应,使用<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_NETWORK" target="_blank" rel="external"><code>CacheControl.FORCE_NETWORK</code></a>.防止一个响应使用网络,只使用缓存,使用<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/CacheControl.html#FORCE_CACHE" target="_blank" rel="external"><code>CacheControl.FORCE_CACHE</code></a>.警告:如果你使用<code>FORCE_CACHE</code>和响应需要网络,OkHttp将返回一个504不可满足的请求响应.</p>
+<h2 id="Canceling-a-Call-取消一个调用"><a href="#Canceling-a-Call-取消一个调用" class="headerlink" title="Canceling a Call 取消一个调用"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/CancelCall.java" target="_blank" rel="external">Canceling a Call 取消一个调用</a></h2><p>Use <code>Call.cancel()</code> to stop an ongoing call immediately. If a thread is currently writing a request or reading a response, it will receive an <code>IOException</code>. Use this to conserve the network when a call is no longer necessary; for example when your user navigates away from an application. Both synchronous and asynchronous calls can be canceled.</p>
+<p>使用 <code>Call.cancel()</code> 立即停止一个正在进行中的调用.如果一个线程正在写一个请求或读一个响应,它将接收一个 <code>IOException</code>.当调用不再是必要的时候使用这种方式保护网络;例如当你的用户导航离开应用程序的时候,同步和异步调用就可以取消。</p>
+<pre><code>private final ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;http://httpbin.org/delay/2&quot;) // This URL is served with a 2 second delay.
+      .build();
+
+  final long startNanos = System.nanoTime();
+  final Call call = client.newCall(request);
+
+  // Schedule a job to cancel the call in 1 second.
+  executor.schedule(new Runnable() {
+    @Override public void run() {
+      System.out.printf(&quot;%.2f Canceling call.%n&quot;, (System.nanoTime() - startNanos) / 1e9f);
+      call.cancel();
+      System.out.printf(&quot;%.2f Canceled call.%n&quot;, (System.nanoTime() - startNanos) / 1e9f);
+    }
+  }, 1, TimeUnit.SECONDS);
+
+  try {
+    System.out.printf(&quot;%.2f Executing call.%n&quot;, (System.nanoTime() - startNanos) / 1e9f);
+    Response response = call.execute();
+    System.out.printf(&quot;%.2f Call was expected to fail, but completed: %s%n&quot;,
+        (System.nanoTime() - startNanos) / 1e9f, response);
+  } catch (IOException e) {
+    System.out.printf(&quot;%.2f Call failed as expected: %s%n&quot;,
+        (System.nanoTime() - startNanos) / 1e9f, e);
+  }
+}
+</code></pre><h2 id="Timeouts-超时"><a href="#Timeouts-超时" class="headerlink" title="Timeouts 超时"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/ConfigureTimeouts.java" target="_blank" rel="external">Timeouts 超时</a></h2><p>Use timeouts to fail a call when its peer is unreachable. Network partitions can be due to client connectivity problems, server availability problems, or anything between. OkHttp supports connect, read, and write timeouts.</p>
+<p>当访问遥不可及时,使用超时来使调用失败.网络分区可能由于客户机连通性问题,服务器的可用性问题,或任何两者之间的问题.OkHttp支持连接,读和写的超时设置.</p>
+<pre><code>private final OkHttpClient client;
+
+public ConfigureTimeouts() throws Exception {
+  client = new OkHttpClient.Builder()
+      .connectTimeout(10, TimeUnit.SECONDS)
+      .writeTimeout(10, TimeUnit.SECONDS)
+      .readTimeout(30, TimeUnit.SECONDS)
+      .build();
+}
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;http://httpbin.org/delay/2&quot;) // This URL is served with a 2 second delay.
+      .build();
+
+  Response response = client.newCall(request).execute();
+  System.out.println(&quot;Response completed: &quot; + response);
+}
+</code></pre><h2 id="Per-call-Configuration-每个调用的设置"><a href="#Per-call-Configuration-每个调用的设置" class="headerlink" title="Per-call Configuration 每个调用的设置"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/PerCallSettings.java" target="_blank" rel="external">Per-call Configuration 每个调用的设置</a></h2><p>All the HTTP client configuration lives in <code>OkHttpClient</code> including proxy settings, timeouts, and caches. When you need to change the configuration of a single call, call <code>OkHttpClient.newBuilder()</code>. This returns a builder that shares the same connection pool, dispatcher, and configuration with the original client. In the example below, we make one request with a 500 ms timeout and another with a 3000 ms timeout.</p>
+<p>所有的HTTP客户端配置在OkHttpClient中,包括代理设置,超时和缓存.当你需要为单个调用改变配置的时候,调用<code>OkHttpClient.newBuilder()</code>.这返回一个builder,分享同样的连接池,分配器和原始OkHttpClient的配置.在下面的示例中,我们让一个请求500ms 超时,另一个请求3000 ms超时.</p>
+<pre><code>private final OkHttpClient client = new OkHttpClient();
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;http://httpbin.org/delay/1&quot;) // This URL is served with a 1 second delay.
+      .build();
+
+  try {
+    // Copy to customize OkHttp for this request.
+    OkHttpClient copy = client.newBuilder()
+        .readTimeout(500, TimeUnit.MILLISECONDS)
+        .build();
+
+    Response response = copy.newCall(request).execute();
+    System.out.println(&quot;Response 1 succeeded: &quot; + response);
+  } catch (IOException e) {
+    System.out.println(&quot;Response 1 failed: &quot; + e);
+  }
+
+  try {
+    // Copy to customize OkHttp for this request.
+    OkHttpClient copy = client.newBuilder()
+        .readTimeout(3000, TimeUnit.MILLISECONDS)
+        .build();
+
+    Response response = copy.newCall(request).execute();
+    System.out.println(&quot;Response 2 succeeded: &quot; + response);
+  } catch (IOException e) {
+    System.out.println(&quot;Response 2 failed: &quot; + e);
+  }
+}
+</code></pre><h2 id="Handling-authentication-处理身份验证"><a href="#Handling-authentication-处理身份验证" class="headerlink" title="Handling authentication 处理身份验证"></a><a href="https://github.com/square/okhttp/blob/master/samples/guide/src/main/java/okhttp3/recipes/Authenticate.java" target="_blank" rel="external">Handling authentication 处理身份验证</a></h2><p>OkHttp can automatically retry unauthenticated requests. When a response is <code>401 Not Authorized</code>, an <code>Authenticator</code> is asked to supply credentials. Implementations should build a new request that includes the missing credentials. If no credentials are available, return null to skip the retry.</p>
+<p>OkHttp可以自动重试未经身份验证的请求.当响应401未授权, 一个<code>Authenticator</code>被访问来提供证书.实现为建立一个新的请求,包含缺失的凭证.如果没有证书可用,返回null来跳过重试.</p>
+<p>Use <code>Response.challenges()</code> to get the schemes and realms of any authentication challenges. When fulfilling a <code>Basic</code> challenge, use <code>Credentials.basic(username, password)</code> to encode the request header.</p>
+<p>使用 <code>Response.challenges()</code> 来获得任何身份验证的方案和领域的挑战。当完成一个基本的挑战,使用 <code>Credentials.basic(username, password)</code> 来编码请求头信息。</p>
+<pre><code>private final OkHttpClient client;
+
+public Authenticate() {
+  client = new OkHttpClient.Builder()
+      .authenticator(new Authenticator() {
+        @Override public Request authenticate(Route route, Response response) throws IOException {
+          System.out.println(&quot;Authenticating for response: &quot; + response);
+          System.out.println(&quot;Challenges: &quot; + response.challenges());
+          String credential = Credentials.basic(&quot;jesse&quot;, &quot;password1&quot;);
+          return response.request().newBuilder()
+              .header(&quot;Authorization&quot;, credential)
+              .build();
+        }
+      })
+      .build();
+}
+
+public void run() throws Exception {
+  Request request = new Request.Builder()
+      .url(&quot;http://publicobject.com/secrets/hellosecret.txt&quot;)
+      .build();
+
+  Response response = client.newCall(request).execute();
+  if (!response.isSuccessful()) throw new IOException(&quot;Unexpected code &quot; + response);
+
+  System.out.println(response.body().string());
+}
+</code></pre><p>To avoid making many retries when authentication isn’t working, you can return null to give up. For example, you may want to skip the retry when these exact credentials have already been attempted:</p>
+<p>为避免当验证不工作而导致许多重试,你可以返回null放弃.例如,当这些确切的证书已经尝试访问过时你可能想跳过重试:</p>
+<pre><code>if (credential.equals(response.request().header(&quot;Authorization&quot;))) {
+  return null; // If we already failed with these credentials, don&apos;t retry.
+ }
+</code></pre><p>You may also skip the retry when you’ve hit an application-defined attempt limit:</p>
+<p>当你设置一个应用程序定义的限制时你也可以跳过重试:</p>
+<pre><code>if (responseCount(response) &gt;= 3) {
+  return null; // If we&apos;ve failed 3 times, give up.
+}
+</code></pre><p>This above code relies on this <code>responseCount()</code> method:</p>
+<p>这上面的代码依赖于 <code>responseCount()</code> 方法:</p>
+<pre><code>private int responseCount(Response response) {
+  int result = 1;
+  while ((response = response.priorResponse()) != null) {
+    result++;
+  }
+  return result;
+}
+</code></pre><hr>
+<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
+<ol>
+<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
+<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
+<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
+<li>Okhttp-wiki 之 Recipes 秘诀(食谱)</li>
+<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
+<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Okhttp/" rel="tag">#Okhttp</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/23/初始Java线程池/" rel="next" title="初识 Java 线程池">
+                <i class="fa fa-chevron-left"></i> 初识 Java 线程池
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/03/11/OkHttp/" rel="prev" title="Okhttp">
+                Okhttp <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+        <!-- JiaThis Button BEGIN -->
+<div class="jiathis_style">
+  <a class="jiathis_button_tsina"></a>
+  <a class="jiathis_button_tqq"></a>
+  <a class="jiathis_button_weixin"></a>
+  <a class="jiathis_button_cqq"></a>
+  <a class="jiathis_button_douban"></a>
+  <a class="jiathis_button_renren"></a>
+  <a class="jiathis_button_qzone"></a>
+  <a class="jiathis_button_kaixin001"></a>
+  <a class="jiathis_button_copy"></a>
+  <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jiathis_separator jtico jtico_jiathis" target="_blank"></a>
+  <a class="jiathis_counter_style"></a>
+</div>
+<script type="text/javascript" >
+  var jiathis_config={
+    hideMore:false
+  }
+</script>
+<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js" charset="utf-8"></script>
+<!-- JiaThis Button END -->
+
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/03/11/Recipes/"
+           data-title="Okhttp-wiki 之 Recipes 秘诀(食谱)" data-url="http://yoursite.com/2016/03/11/Recipes/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/images/焉逢(皇甫朝云).jpg"
+               alt="汉之风云" />
+          <p class="site-author-name" itemprop="name">汉之风云</p>
+          <p class="site-description motion-element" itemprop="description">活着 开心就好</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">10</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+            <div class="site-state-item site-state-categories">
+              <a href="/categories">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">3</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/hanzhifengyun" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/hanzhifengyun" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+          <div class="links-of-blogroll motion-element links-of-blogroll-inline">
+            <div class="links-of-blogroll-title">
+              <i class="fa  fa-fw fa-globe"></i>
+              Links
+            </div>
+            <ul class="links-of-blogroll-list">
+              
+                <li class="links-of-blogroll-item">
+                  <a href="http://www.sunlianshuang.com" title="John Sun" target="_blank">John Sun</a>
+                </li>
+              
+            </ul>
+          </div>
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Okhttp-wiki-之-Recipes-秘诀-食谱"><span class="nav-number">1.</span> <span class="nav-text">Okhttp-wiki 之 Recipes 秘诀(食谱)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Synchronous-同步的-Get"><span class="nav-number">1.1.</span> <span class="nav-text">Synchronous (同步的) Get</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Asynchronous-异步的-Get"><span class="nav-number">1.2.</span> <span class="nav-text">Asynchronous (异步的) Get</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Accessing-Headers-访问头信息"><span class="nav-number">1.3.</span> <span class="nav-text">Accessing Headers 访问头信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Posting-a-String-上传字符串"><span class="nav-number">1.4.</span> <span class="nav-text">Posting a String 上传字符串</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Post-Streaming-上传流"><span class="nav-number">1.5.</span> <span class="nav-text">Post Streaming 上传流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Posting-a-File-上传文件"><span class="nav-number">1.6.</span> <span class="nav-text">Posting a File 上传文件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Posting-form-parameters-上传表格参数"><span class="nav-number">1.7.</span> <span class="nav-text">Posting form parameters 上传表格参数</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Posting-a-multipart-request-上传多部分的请求"><span class="nav-number">1.8.</span> <span class="nav-text">Posting a multipart request 上传多部分的请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Parse-a-JSON-Response-With-Gson-用Gson解析一个JSON响应"><span class="nav-number">1.9.</span> <span class="nav-text">Parse a JSON Response With Gson 用Gson解析一个JSON响应</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Response-Caching-响应缓存"><span class="nav-number">1.10.</span> <span class="nav-text">Response Caching 响应缓存</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Canceling-a-Call-取消一个调用"><span class="nav-number">1.11.</span> <span class="nav-text">Canceling a Call 取消一个调用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Timeouts-超时"><span class="nav-number">1.12.</span> <span class="nav-text">Timeouts 超时</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Per-call-Configuration-每个调用的设置"><span class="nav-number">1.13.</span> <span class="nav-text">Per-call Configuration 每个调用的设置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Handling-authentication-处理身份验证"><span class="nav-number">1.14.</span> <span class="nav-text">Handling authentication 处理身份验证</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">汉之风云</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+        
+
+<div class="busuanzi-count">
+
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv"><i class="fa fa-user"></i><span class="busuanzi-value" id="busuanzi_value_site_uv"></span></span>
+  
+
+  
+    <span class="site-pv"><i class="fa fa-eye"></i><span class="busuanzi-value" id="busuanzi_value_site_pv"></span></span>
+  
+  
+</div>
+
+
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.1"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.1"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"hanzhifengyun"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/vendors/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
