@@ -257,6 +257,172 @@
             
               
                 
+                <a class="post-title-link" href="/2016/07/28/再续Java线程池/" itemprop="url">
+                  Java 线程池
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-07-28T15:14:31+08:00" content="2016-07-28">
+              2016-07-28
+            </time>
+          </span>
+
+          
+            <span class="post-category" >
+              &nbsp; | &nbsp;
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+              
+                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
+                  <a href="/categories/Java/" itemprop="url" rel="index">
+                    <span itemprop="name">Java</span>
+                  </a>
+                </span>
+
+                
+                
+
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/07/28/再续Java线程池/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/07/28/再续Java线程池/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          
+            <h1 id="再续-Java-线程池"><a href="#再续-Java-线程池" class="headerlink" title="再续 Java 线程池"></a>再续 Java 线程池</h1><blockquote>
+<p>本文引领大家更深层次的理解线程池的工作原理</p>
+<p>大家可以先看看前一篇文章 <a href="http://www.hanzhifengyun.com/2016/02/23/%E5%88%9D%E5%A7%8BJava%E7%BA%BF%E7%A8%8B%E6%B1%A0" target="_blank" rel="external"><strong>初识 Java 线程池</strong></a></p>
+</blockquote>
+<p>相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?</p>
+<p>上一篇文章提到Java通过Executors来创建四种线程池, 进入源码我们会发现, 真正的线程池的实现为 <code>ThreadPoolExecutor</code> .</p>
+<h2 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor #\"></a>ThreadPoolExecutor #\</h2><p>public ThreadPoolExecutor(int corePoolSize,<br>  int maximumPoolSize,<br>  long keepAliveTime,<br>  TimeUnit unit,<br>  BlockingQueue\<runnable\> workQueue,<br>  ThreadFactory threadFactory,<br>  RejectedExecutionHandler handler) </runnable\></p>
+<p><code>ThreadPoolExecutor</code>的构造函数的参数用来配置线程池, 下面我们一个个来分析:</p>
+<ol>
+<li><p><code>corePoolSize</code> :线程池的核心线程数, 一般情况下不管有没有任务都会一直在线程池中一直存活, 只有在 <code>ThreadPoolExecutor</code>中的方法 <code>allowCoreThreadTimeOut(boolean value)</code> 设置为 <code>true</code>时, 闲置的核心线程会存在超时机制, 如果在指定时间没有新任务来时, 核心线程也会被终止, 而这个时间间隔由第3个属性 <code>keepAliveTime</code> 指定.</p>
+</li>
+<li><p><code>maximumPoolSize</code> : 线程池所能容纳的最大线程数, 当活动的线程数达到这个值后, 后续的新任务将会被阻塞.</p>
+</li>
+<li><p><code>keepAliveTime</code> : 控制线程闲置时的超时时长, 超过则终止该线程. 一般情况下用于非核心线程.只有在 <code>ThreadPoolExecutor</code>中的方法 <code>allowCoreThreadTimeOut(boolean value)</code> 设置为 <code>true</code>时, 也作用于核心线程.</p>
+</li>
+<li><p><code>unit</code> : 用于指定<code>keepAliveTime</code> 参数的时间单位, <code>TimeUnit</code> 是个enum枚举类型, 常用的有: TimeUnit.HOURS(小时)、TimeUnit.MINUTES(分钟)、TimeUnit.SECONDS(秒)和TimeUnit.MILLISECONDS(毫秒)等.</p>
+</li>
+<li><p><code>workQueue</code> : 线程池的任务队列, 通过线程池的<code>execute(Runnable command)</code>方法会将任务 <code>Runnable</code> 存储在队列中.</p>
+</li>
+<li><p><code>threadFactory</code> : 线程工厂, 它是一个接口, 就 <code>Thread newThread(Runnable r)</code>一个方法, 用来为线程池创建新线程的功能.</p>
+</li>
+<li><p><code>handler</code> : 当任务队列已满或者无法成功执行任务时, <code>ThreadPoolExecutor</code> 会通过 <code>handler</code> 的<code>rejectedExecution(Runnable r, ThreadPoolExecutor executor)</code>来通知调用者, 默认情况下回抛出一个<code>RejectedExecutionException</code>. 这个参数一般使用默认值,不常用.</p>
+</li>
+</ol>
+<blockquote>
+<p>上面是完整的构造函数, <code>ThreadPoolExecutor</code>还提供其他构造函数, 参数6 和 7 是可选的, 不配置则使用默认配置.</p>
+</blockquote>
+<h2 id="ThreadPoolExecutor-的核心实现-execute"><a href="#ThreadPoolExecutor-的核心实现-execute" class="headerlink" title="ThreadPoolExecutor 的核心实现: execute() #\"></a>ThreadPoolExecutor 的核心实现: execute() #\</h2><hr>
+<p> <strong>重头戏来了</strong>,由于源码封装较多,它的代码量也就下面几行:这边直接贴出来</p>
+<p>public void execute(Runnable command)<br>if (command == null)<br>throw new NullPointerException();<br>int c = ctl.get();<br>//如果运行中的线程少于核心线程的数量<br>if (workerCountOf(c) \&lt; corePoolSize)<br>//启动一个核心线程来执行任务<br>if (addWorker(command, true))<br>return;<br>//如果增加该线程失败时的情况,继续往下走<br>c = ctl.get();<br>}<br>//如果一个任务被加入任务队列中<br>if (isRunning(c) &amp;&amp; workQueue.offer(command))<br>int recheck = ctl.get();<br>//仍然需要仔细检查我们是否应该添加一个线程(因为上次检查存在的任务可能已经终止),或者在进入这个方法的时候线程池被关闭<br>if (! isRunning(recheck) &amp;&amp; remove(command))<br>reject(command);<br>//然后再次检查有没有正在运行的线程<br>else if (workerCountOf(recheck) == 0)<br>addWorker(null, false);<br>}<br>//如果任务不能被加入任务队列,则尝试添加一个新线程去执行,如果失败了,也许可能任务已被取消或者任务队列已经饱和,所以拒绝任务.<br>else if (!addWorker(command, false))<br>reject(command);<br>}</p>
+<blockquote>
+<p>ctl 体现了线程池的状态, 其中包含两个字段:<code>workerCount</code>(有效的线程数量) 和 <code>runState</code> (运行状态, 运行中、停止等等)</p>
+<p>reject(command)表示通知调用者任务队列已满或者无法成功执行任务</p>
+</blockquote>
+<p><code>ThreadPoolExecutor</code>执行任务的时候分了三步:</p>
+<ol>
+<li><p>如果运行中的线程少于核心线程的数量, 启动一个核心线程来执行任务.调用<code>addWorker()</code>时再次检查运行状态和工作线程数量,防止如果增加该线程失败时的情况,则返回false.</p>
+</li>
+<li><p>如果一个任务被加入任务队列中,仍然需要仔细检查我们是否应该添加一个线程(因为上次检查存在的任务可能已经终止),或者在进入这个方法的时候线程池被关闭.所以重新检查状态,如果需要的话在任务队列被取消的时候拒绝任务,然后再次检查有没有正在运行的线程,如果没有则创建一个新的线程去执行.</p>
+</li>
+<li><p>如果任务不能被加入任务队列,则尝试添加一个新线程去执行,如果失败了,也许可能任务已被取消或者任务队列已经饱和,所以拒绝任务.</p>
+</li>
+</ol>
+<blockquote>
+<p>好啦! 对Java线程池的运行原理也了解的差不多了, 希望对大家的学习有所帮助</p>
+<p>最后, 提醒大家,千万别看完就忘了哦, 要学以致用!</p>
+</blockquote>
+
+          
+        
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <div>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/07/27/git-flow/" itemprop="url">
                   git-flow
                 </a>
@@ -922,7 +1088,7 @@ delay 1 seconds, and excute every 3 seconds
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">4</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
