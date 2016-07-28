@@ -84,16 +84,22 @@
 
 
 
-<meta name="description" content="OkhttpAn HTTP &amp;amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端Overview 描述HTTP is the way modern applications network. It’s how we exchange data &amp;amp; media. Doin">
+<meta name="description" content="Okhttp-wiki 之 Calls 调用The HTTP client’s job is to accept your request and produce its response. This is simple in theory but it gets tricky in practice.
+HTTP客户端的工作是接受你的请求,并生成其响应。说起来简单但做起来复杂.
+Requests">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Okhttp">
-<meta property="og:url" content="http://yoursite.com/2016/03/11/OkHttp/index.html">
+<meta property="og:title" content="Okhttp-wiki 之 Calls 调用">
+<meta property="og:url" content="http://yoursite.com/2016/03/11/Calls/index.html">
 <meta property="og:site_name" content="汉之风云">
-<meta property="og:description" content="OkhttpAn HTTP &amp;amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端Overview 描述HTTP is the way modern applications network. It’s how we exchange data &amp;amp; media. Doin">
-<meta property="og:updated_time" content="2016-07-28T07:29:14.000Z">
+<meta property="og:description" content="Okhttp-wiki 之 Calls 调用The HTTP client’s job is to accept your request and produce its response. This is simple in theory but it gets tricky in practice.
+HTTP客户端的工作是接受你的请求,并生成其响应。说起来简单但做起来复杂.
+Requests">
+<meta property="og:updated_time" content="2016-07-28T07:31:55.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Okhttp">
-<meta name="twitter:description" content="OkhttpAn HTTP &amp;amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端Overview 描述HTTP is the way modern applications network. It’s how we exchange data &amp;amp; media. Doin">
+<meta name="twitter:title" content="Okhttp-wiki 之 Calls 调用">
+<meta name="twitter:description" content="Okhttp-wiki 之 Calls 调用The HTTP client’s job is to accept your request and produce its response. This is simple in theory but it gets tricky in practice.
+HTTP客户端的工作是接受你的请求,并生成其响应。说起来简单但做起来复杂.
+Requests">
 
 
 
@@ -114,9 +120,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2016/03/11/OkHttp/"/>
+  <link rel="canonical" href="http://yoursite.com/2016/03/11/Calls/"/>
 
-  <title> Okhttp | 汉之风云 </title>
+  <title> Okhttp-wiki 之 Calls 调用 | 汉之风云 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -255,7 +261,7 @@
             
             
               
-                Okhttp
+                Okhttp-wiki 之 Calls 调用
               
             
           </h1>
@@ -297,8 +303,8 @@
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2016/03/11/OkHttp/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/11/OkHttp/" itemprop="commentsCount"></span>
+                <a href="/2016/03/11/Calls/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/11/Calls/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -326,50 +332,57 @@
       
 
       
-        <h1 id="Okhttp"><a href="#Okhttp" class="headerlink" title="Okhttp"></a>Okhttp</h1><h2 id="An-HTTP-amp-HTTP-2-client-for-Android-and-Java-applications-用于Android和Java应用程序HTTP和HTTP-2的客户端"><a href="#An-HTTP-amp-HTTP-2-client-for-Android-and-Java-applications-用于Android和Java应用程序HTTP和HTTP-2的客户端" class="headerlink" title="An HTTP &amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端"></a>An HTTP &amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端</h2><h3 id="Overview-描述"><a href="#Overview-描述" class="headerlink" title="Overview 描述"></a>Overview 描述</h3><p>HTTP is the way modern applications network. It’s how we exchange data &amp; media. Doing HTTP efficiently makes your stuff load faster and saves bandwidth.</p>
-<p>HTTP是拉近网络应用程序的方式.这是我们如何交换数据和媒体.使用HTTP有效地使你的东西加载更快,节省带宽.</p>
-<p>OkHttp is an HTTP client that’s efficient by default:</p>
+        <h1 id="Okhttp-wiki-之-Calls-调用"><a href="#Okhttp-wiki-之-Calls-调用" class="headerlink" title="Okhttp-wiki 之 Calls 调用"></a>Okhttp-wiki 之 Calls 调用</h1><p>The HTTP client’s job is to accept your request and produce its response. This is simple in theory but it gets tricky in practice.</p>
+<p>HTTP客户端的工作是接受你的请求,并生成其响应。说起来简单但做起来复杂.</p>
+<h2 id="Requests-请求"><a href="#Requests-请求" class="headerlink" title="Requests 请求"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Request.html" target="_blank" rel="external">Requests 请求</a></h2><p>Each HTTP request contains a URL, a method (like GET or POST), and a list of headers. Requests may also contain a body: a data stream of a specific content type.</p>
+<p>每个HTTP请求包含一个URL、一个方法(如GET或POST),同时包含头信息的列表。请求也可能包含一个实体:具体类型内容的数据流。</p>
+<h2 id="Responses-响应"><a href="#Responses-响应" class="headerlink" title="Responses 响应"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Response.html" target="_blank" rel="external">Responses 响应</a></h2><p>The response answers the request with a code (like 200 for success or 404 for not found), headers, and its own optional body.</p>
+<p>根据请求返回的响应码(成功的200或没有找到内容的404),头信息,和可选的实体。</p>
+<h3 id="Rewriting-Requests-重写请求"><a href="#Rewriting-Requests-重写请求" class="headerlink" title="Rewriting Requests 重写请求"></a>Rewriting Requests 重写请求</h3><p>When you provide OkHttp with an HTTP request, you’re describing the request at a high-level: “fetch me this URL with these headers.” For correctness and efficiency, OkHttp rewrites your request before transmitting it.</p>
+<p>为OkHttp提供一个HTTP请求时,你描述一个高水平的请求给okhttp:”拿到包含这些头信息的请求”.为了确保正确性和效率,在传输之前OkHttp会重写你的请求。</p>
+<p>OkHttp may add headers that are absent from the original request, including Content-Length, Transfer-Encoding, User-Agent, Host, Connection, and Content-Type. It will add an Accept-Encoding header for transparent response compression unless the header is already present. If you’ve got cookies, OkHttp will add a Cookie header with them.</p>
+<p>OkHttp可能为原始请求添加缺少的头信息,包括内容长度,传输编码,用户代理、主机,连接,和内容类型。它将添加一个明确的编码头信息来压缩响应,除非该头信息已经存在.如果你有cookies,OkHttp将添加一个cookie头信息在里面。</p>
+<p>Some requests will have a cached response. When this cached response isn’t fresh, OkHttp can do a conditional GET to download an updated response if it’s newer than what’s cached. This requires headers like If-Modified-Since and If-None-Match to be added.</p>
+<p>一些请求会有响应的缓存。当这个缓存的响应不再是最新的,OkHttp做一个条件判断如果有新的响应则下载最新的响应.这种需求头信息被添加就像If-Modified-Since 和 If-None-Match模式。(如果没有缓存则匹配最新的并缓存下来;如果有缓存则看看是否是最新的,如果是最新的则直接返回缓存,否则请求最新的并更新缓存.)</p>
+<h3 id="Rewriting-Responses-重写响应"><a href="#Rewriting-Responses-重写响应" class="headerlink" title="Rewriting Responses 重写响应"></a>Rewriting Responses 重写响应</h3><p>If transparent compression was used, OkHttp will drop the corresponding response headers Content-Encoding and Content-Length because they don’t apply to the decompressed response body.</p>
+<p>如果使用了明确的压缩,OkHttp将删除对应的响应头信息:内容编码和内容长度,因为他们并不适用于实体解压的响应实体。</p>
+<p>If a conditional GET was successful, responses from the network and cache are merged as directed by the spec.</p>
+<p>如果GET请求成功,响应和缓存将会按照规范来合并.</p>
+<h3 id="Follow-up-Requests-跟进请求"><a href="#Follow-up-Requests-跟进请求" class="headerlink" title="Follow-up Requests 跟进请求"></a>Follow-up Requests 跟进请求</h3><p>When your requested URL has moved, the webserver will return a response code like 302 to indicate the document’s new URL. OkHttp will follow the redirect to retrieve a final response.</p>
+<p>当你通过URL请求时,网络服务器将返回一个响应代码,比如说302来指出新的URL路径.OkHttp会重定向直到检索到最终的响应。</p>
+<p>If the response issues an authorization challenge, OkHttp will ask the <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Authenticator.html" target="_blank" rel="external">Authenticator</a> (if one is configured) to satisfy the challenge. If the authenticator supplies a credential, the request is retried with that credential included.</p>
+<p>如果响应需要授权验证,OkHttp将访问<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Authenticator.html" target="_blank" rel="external">Authenticator</a>(如果已经配置过一个)来满足这个验证。如果认证器提供一个凭证,请求将会带上凭证重新访问。</p>
+<h3 id="Retrying-Requests-请求重试"><a href="#Retrying-Requests-请求重试" class="headerlink" title="Retrying Requests 请求重试"></a>Retrying Requests 请求重试</h3><p>Sometimes connections fail: either a pooled connection was stale and disconnected, or the webserver itself couldn’t be reached. OkHttp will retry the request with a different route if one is available.</p>
+<p>有时候会连接失败:某个连接池过时了或者断开连接,或者该网络服务器本身无法被访问。OkHttp将通过一个不同的线路重试请求。</p>
+<h2 id="Calls-调用"><a href="#Calls-调用" class="headerlink" title="Calls 调用"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Call.html" target="_blank" rel="external">Calls 调用</a></h2><p>With rewrites, redirects, follow-ups and retries, your simple request may yield many requests and responses. OkHttp uses Call to model the task of satisfying your request through however many intermediate requests and responses are necessary. Typically this isn’t many! But it’s comforting to know that your code will continue to work if your URLs are redirected or if you failover to an alternate IP address.</p>
+<p>伴随着重写,重定向,跟进和重试,你简单的请求可能产生许多请求和响应。OkHttp将调用一系列任务直到满足你的需求,然而许多中间的任务请求和响应是必要的。通常这不是很多!但欣慰的是您的代码将继续执行如果你的url重定向或故障转移到另一个IP地址。</p>
+<p>Calls are executed in one of two ways:</p>
 <ul>
-<li>HTTP/2 support allows all requests to the same host to share a socket.</li>
-<li>Connection pooling reduces request latency (if HTTP/2 isn’t available).</li>
-<li>Transparent GZIP shrinks download sizes.</li>
-<li>Response caching avoids the network completely for repeat requests.</li>
+<li>Synchronous: your thread blocks until the response is readable.</li>
+<li>Asynchronous: you enqueue the request on any thread, and get called back on another thread when the response is readable.</li>
 </ul>
-<p>OkHttp就是一个有效的HTTP客户端:</p>
+<p>调用将会执行以下两种方式中的一种:</p>
 <ul>
-<li>HTTP/2的支持允许所有请求在相同的主机上共享一个socket.</li>
-<li>连接池可以减少请求延迟(如果HTTP/2则不可使用).</li>
-<li>透明的压缩可以减少下载大小.</li>
-<li>响应缓存避免了网络重复完整的请求.</li>
+<li>同步的:你的线程被锁住直到响应返回.</li>
+<li>异步的:你在任何线程安排请求,在另一个线程获得响应回调。</li>
 </ul>
-<p>OkHttp perseveres when the network is troublesome: it will silently recover from common connection problems. If your service has multiple IP addresses OkHttp will attempt alternate addresses if the first connect fails. This is necessary for IPv4+IPv6 and for services hosted in redundant data centers. OkHttp initiates new connections with modern TLS features (SNI, ALPN), and falls back to TLS 1.0 if the handshake fails.</p>
-<p>当网络出现问题时OkHttp会坚守着:它会悄然从常见的连接问题中恢复过来.如果你的服务有多个IP地址,如果第一个连接失败OkHttp将尝试备用地址.对IPv4 + IPv6和服务来说托管在冗余的数据中心是必要的.OkHttp发起最新TLS特性(SNI ALPN)的新连接,如果握手失败则回退至TLS 1.0.</p>
-<p>Using OkHttp is easy. Its request/response API is designed with fluent builders and immutability. It supports both synchronous blocking calls and async calls with callbacks.</p>
-<p>使用OkHttp很容易.它的请求/响应的API设计拥有流畅的建造器和不变性.它同时支持同步阻塞调用和异步回调调用.</p>
-<p>OkHttp supports Android 2.3 and above. For Java, the minimum requirement is 1.7.</p>
-<p>OkHttp支持Android 2.3及以上.对于Java,最低要求是1.7.</p>
+<p>Calls can be canceled from any thread. This will fail the call if it hasn’t yet completed! Code that is writing the request body or reading the response body will suffer an IOException when its call is canceled.</p>
+<p>从任何线程都可以取消调用。如果调用还没有完成,这将使得调用失败!当调用取消时代码中对请求实体或响应实体做读写操作会得到一个IOException。</p>
+<h3 id="Dispatch-派遣"><a href="#Dispatch-派遣" class="headerlink" title="Dispatch 派遣"></a>Dispatch 派遣</h3><p>For synchronous calls, you bring your own thread and are responsible for managing how many simultaneous requests you make. Too many simultaneous connections wastes resources; too few harms latency.</p>
+<p>对于同步调用,你用自己的线程负责管理有多少并发请求。太多的并发连接浪费资源;特别是导致延迟。</p>
+<p>For asynchronous calls, <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Dispatcher.html" target="_blank" rel="external">Dispatcher</a> implements policy for maximum simultaneous requests. You can set maximums per-webserver (default is 5), and overall (default is 64).</p>
+<p>对于异步调用,<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Dispatcher.html" target="_blank" rel="external">Dispatcher</a>实现最多的并发请求政策。你可以设置每个主机最大请求数(默认为5),和最大并发请求数(默认是64)。</p>
 <hr>
 <p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
 <ol>
 <li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
-<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
+<li>Okhttp-wiki 之 Calls 调用</li>
 <li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
 <li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
 <li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
 <li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
 </ol>
-<h3 id="Download-下载"><a href="#Download-下载" class="headerlink" title="Download 下载"></a>Download 下载</h3><p>Okhttp’s <a href="https://search.maven.org/remote_content?g=com.squareup.okhttp3&amp;a=okhttp&amp;v=LATEST" target="_blank" rel="external">Latest JAR</a></p>
-<p>You’ll also need <a href="http://github.com/square/okio" target="_blank" rel="external">Okio</a>, which OkHttp uses for fast I/O and resizable buffers. Download the <a href="https://search.maven.org/remote_content?g=com.squareup.okio&amp;a=okio&amp;v=LATEST" target="_blank" rel="external">latest JAR</a>.</p>
-<p>你将还需要 <a href="http://github.com/square/okio" target="_blank" rel="external">Okio</a>,OkHttp用来快速I/O和可调整大小的缓冲区.下载<a href="https://search.maven.org/remote_content?g=com.squareup.okio&amp;a=okio&amp;v=LATEST" target="_blank" rel="external">最新的JAR</a>。</p>
-<p>The source code to OkHttp, its samples, and this website is available on <a href="http://github.com/square/okhttp" target="_blank" rel="external">GitHub</a>.</p>
-<p>OkHttp的源代码,其示例,可以在这个网站上看到: <a href="http://github.com/square/okhttp" target="_blank" rel="external">GitHub</a>.</p>
-<h4 id="MAVEN"><a href="#MAVEN" class="headerlink" title="MAVEN"></a>MAVEN</h4><pre><code>&lt;dependency&gt;
-  &lt;groupId&gt;com.squareup.okhttp3&lt;/groupId&gt;
-  &lt;artifactId&gt;okhttp&lt;/artifactId&gt;
-  &lt;version&gt;(insert latest version)&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre><h4 id="GRADLE"><a href="#GRADLE" class="headerlink" title="GRADLE"></a>GRADLE</h4><pre><code>compile &apos;com.squareup.okhttp3:okhttp:(insert latest version)&apos;
-</code></pre>
+
       
     </div>
 
@@ -400,16 +413,16 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/03/11/Interceptors/" rel="next" title="Okhttp-wiki 之 Interceptors 拦截器">
-                <i class="fa fa-chevron-left"></i> Okhttp-wiki 之 Interceptors 拦截器
+              <a href="/2016/03/11/HTTPS/" rel="next" title="Okhttp-wiki 之 HTTPS">
+                <i class="fa fa-chevron-left"></i> Okhttp-wiki 之 HTTPS
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2016/07/27/hello-world/" rel="prev" title="Hello World">
-                Hello World <i class="fa fa-chevron-right"></i>
+              <a href="/2016/03/11/Recipes/" rel="prev" title="Okhttp-wiki 之 Recipes 秘诀(食谱)">
+                Okhttp-wiki 之 Recipes 秘诀(食谱) <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -459,8 +472,8 @@
           
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2016/03/11/OkHttp/"
-           data-title="Okhttp" data-url="http://yoursite.com/2016/03/11/OkHttp/">
+      <div class="ds-thread" data-thread-key="2016/03/11/Calls/"
+           data-title="Okhttp-wiki 之 Calls 调用" data-url="http://yoursite.com/2016/03/11/Calls/">
       </div>
     
   </div>
@@ -585,7 +598,7 @@
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Okhttp"><span class="nav-number">1.</span> <span class="nav-text">Okhttp</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#An-HTTP-amp-HTTP-2-client-for-Android-and-Java-applications-用于Android和Java应用程序HTTP和HTTP-2的客户端"><span class="nav-number">1.1.</span> <span class="nav-text">An HTTP & HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Overview-描述"><span class="nav-number">1.1.1.</span> <span class="nav-text">Overview 描述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Download-下载"><span class="nav-number">1.1.2.</span> <span class="nav-text">Download 下载</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#MAVEN"><span class="nav-number">1.1.2.1.</span> <span class="nav-text">MAVEN</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#GRADLE"><span class="nav-number">1.1.2.2.</span> <span class="nav-text">GRADLE</span></a></li></ol></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Okhttp-wiki-之-Calls-调用"><span class="nav-number">1.</span> <span class="nav-text">Okhttp-wiki 之 Calls 调用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Requests-请求"><span class="nav-number">1.1.</span> <span class="nav-text">Requests 请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Responses-响应"><span class="nav-number">1.2.</span> <span class="nav-text">Responses 响应</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Rewriting-Requests-重写请求"><span class="nav-number">1.2.1.</span> <span class="nav-text">Rewriting Requests 重写请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Rewriting-Responses-重写响应"><span class="nav-number">1.2.2.</span> <span class="nav-text">Rewriting Responses 重写响应</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Follow-up-Requests-跟进请求"><span class="nav-number">1.2.3.</span> <span class="nav-text">Follow-up Requests 跟进请求</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Retrying-Requests-请求重试"><span class="nav-number">1.2.4.</span> <span class="nav-text">Retrying Requests 请求重试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Calls-调用"><span class="nav-number">1.3.</span> <span class="nav-text">Calls 调用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Dispatch-派遣"><span class="nav-number">1.3.1.</span> <span class="nav-text">Dispatch 派遣</span></a></li></ol></li></ol></li></ol></div>
             
           </div>
         </section>
