@@ -102,7 +102,7 @@ ThreadPoolEx">
 相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?
 上一篇文章提到Java通过Executors来创建四种线程池, 进入源码我们会发现, 真正的线程池的实现为 ThreadPoolExecutor .
 ThreadPoolEx">
-<meta property="og:updated_time" content="2016-07-28T07:17:25.000Z">
+<meta property="og:updated_time" content="2016-07-28T07:18:34.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 线程池">
 <meta name="twitter:description" content="再续 Java 线程池
@@ -379,8 +379,33 @@ ThreadPoolEx">
 </blockquote>
 <h2 id="ThreadPoolExecutor-的核心实现-execute"><a href="#ThreadPoolExecutor-的核心实现-execute" class="headerlink" title="ThreadPoolExecutor 的核心实现: execute()"></a>ThreadPoolExecutor 的核心实现: execute()</h2><hr>
 <p> <strong>重头戏来了</strong>,由于源码封装较多,它的代码量也就下面几行:这边直接贴出来</p>
-<p>public void execute(Runnable command)<br>if (command == null)<br>throw new NullPointerException();<br>int c = ctl.get();<br>//如果运行中的线程少于核心线程的数量<br>if (workerCountOf(c) \&lt; corePoolSize)<br>//启动一个核心线程来执行任务<br>if (addWorker(command, true))<br>return;<br>//如果增加该线程失败时的情况,继续往下走<br>c = ctl.get();<br>}<br>//如果一个任务被加入任务队列中<br>if (isRunning(c) &amp;&amp; workQueue.offer(command))<br>int recheck = ctl.get();<br>//仍然需要仔细检查我们是否应该添加一个线程(因为上次检查存在的任务可能已经终止),或者在进入这个方法的时候线程池被关闭<br>if (! isRunning(recheck) &amp;&amp; remove(command))<br>reject(command);<br>//然后再次检查有没有正在运行的线程<br>else if (workerCountOf(recheck) == 0)<br>addWorker(null, false);<br>}<br>//如果任务不能被加入任务队列,则尝试添加一个新线程去执行,如果失败了,也许可能任务已被取消或者任务队列已经饱和,所以拒绝任务.<br>else if (!addWorker(command, false))<br>reject(command);<br>}</p>
-<blockquote>
+<pre><code>public void execute(Runnable command) 
+if (command == null)
+throw new NullPointerException();
+int c = ctl.get();
+//如果运行中的线程少于核心线程的数量
+if (workerCountOf(c) \&lt; corePoolSize) 
+//启动一个核心线程来执行任务
+if (addWorker(command, true))
+return;
+//如果增加该线程失败时的情况,继续往下走
+c = ctl.get();
+}
+//如果一个任务被加入任务队列中
+if (isRunning(c) &amp;&amp; workQueue.offer(command)) 
+int recheck = ctl.get();
+//仍然需要仔细检查我们是否应该添加一个线程(因为上次检查存在的任务可能已经终止),或者在进入这个方法的时候线程池被关闭
+if (! isRunning(recheck) &amp;&amp; remove(command))
+reject(command);
+//然后再次检查有没有正在运行的线程
+else if (workerCountOf(recheck) == 0)
+addWorker(null, false);
+}
+//如果任务不能被加入任务队列,则尝试添加一个新线程去执行,如果失败了,也许可能任务已被取消或者任务队列已经饱和,所以拒绝任务.
+else if (!addWorker(command, false))
+reject(command);
+}
+</code></pre><blockquote>
 <p>ctl 体现了线程池的状态, 其中包含两个字段:<code>workerCount</code>(有效的线程数量) 和 <code>runState</code> (运行状态, 运行中、停止等等)</p>
 <p>reject(command)表示通知调用者任务队列已满或者无法成功执行任务</p>
 </blockquote>
