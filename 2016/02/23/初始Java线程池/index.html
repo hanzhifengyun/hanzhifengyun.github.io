@@ -85,42 +85,36 @@
 
 
 <meta name="description" content="初识 Java 线程池
-
 本文引领大家进入线程池的世界
 
 很多人对线程的认识可能比较熟悉, 知道它能开启一个任务去做某些事情, 那么线程池又是什么鬼? 不着急, 我们先来回顾一下线程的使用.
 Java 线程正常情况下我们使用线程都是用new Thread()来开启一个线程:
 new Thread(new Runnable() {
     @Override
-    public void run(">
+    public void run()">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Java 线程池">
 <meta property="og:url" content="http://yoursite.com/2016/02/23/初始Java线程池/index.html">
 <meta property="og:site_name" content="汉之风云">
 <meta property="og:description" content="初识 Java 线程池
-
 本文引领大家进入线程池的世界
 
 很多人对线程的认识可能比较熟悉, 知道它能开启一个任务去做某些事情, 那么线程池又是什么鬼? 不着急, 我们先来回顾一下线程的使用.
 Java 线程正常情况下我们使用线程都是用new Thread()来开启一个线程:
 new Thread(new Runnable() {
     @Override
-    public void run(">
-<meta property="og:image" content="http://yoursite.com/Users/hanzhifengyun/Hexo/public/images/%E6%B1%A0.jpg">
-<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1504154-d6438f511324368f.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2016-07-28T07:03:39.000Z">
+    public void run()">
+<meta property="og:updated_time" content="2016-07-28T07:05:54.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Java 线程池">
 <meta name="twitter:description" content="初识 Java 线程池
-
 本文引领大家进入线程池的世界
 
 很多人对线程的认识可能比较熟悉, 知道它能开启一个任务去做某些事情, 那么线程池又是什么鬼? 不着急, 我们先来回顾一下线程的使用.
 Java 线程正常情况下我们使用线程都是用new Thread()来开启一个线程:
 new Thread(new Runnable() {
     @Override
-    public void run(">
-<meta name="twitter:image" content="http://yoursite.com/Users/hanzhifengyun/Hexo/public/images/%E6%B1%A0.jpg">
+    public void run()">
 
 
 
@@ -353,8 +347,7 @@ new Thread(new Runnable() {
       
 
       
-        <h1 id="初识-Java-线程池"><a href="#初识-Java-线程池" class="headerlink" title="初识 Java 线程池"></a>初识 Java 线程池</h1><p><img src="/Users/hanzhifengyun/Hexo/public/images/%E6%B1%A0.jpg" alt="pool.jpg"></p>
-<blockquote>
+        <h1 id="初识-Java-线程池"><a href="#初识-Java-线程池" class="headerlink" title="初识 Java 线程池"></a>初识 Java 线程池</h1><blockquote>
 <p>本文引领大家进入线程池的世界</p>
 </blockquote>
 <p>很多人对线程的认识可能比较熟悉, 知道它能开启一个任务去做某些事情, 那么线程池又是什么鬼? 不着急, 我们先来回顾一下线程的使用.</p>
@@ -390,7 +383,6 @@ new Thread(new Runnable() {
 <blockquote>
 <p>理论永远不如实践来的实在, 那么我们举栗子说明</p>
 </blockquote>
-<p><img src="http://upload-images.jianshu.io/upload_images/1504154-d6438f511324368f.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="栗子.jpg"></p>
 <p>首先我们来看看Thread 的用法:</p>
 <pre><code>public class ThreadTest {
 
