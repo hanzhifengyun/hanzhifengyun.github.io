@@ -269,83 +269,9 @@
       
         <h1 id="再续-Java-线程池"><a href="#再续-Java-线程池" class="headerlink" title="再续 Java 线程池"></a>再续 Java 线程池</h1><blockquote>
 <p>本文引领大家更深层次的理解线程池的工作原理</p>
-<p>大家可以先看看前一篇文章 <a href="http://www.hanzhifengyun.com/2016/02/23/%E5%88%9D%E5%A7%8BJava%E7%BA%BF%E7%A8%8B%E6%B1%A0" target="_blank" rel="external"><strong>初识 Java 线程池</strong></a></p>
+<p>大家可以先看看前一篇文章 <a href="http://www.hanzhifengyun.com/2016/02/23/%E5%88%9D%E5%A7%8BJava%E7%BA%BF%E7%A8%8B%E6%B1%A0"><strong>初识 Java 线程池</strong></a></p>
 </blockquote>
-<p>相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?</p>
-<p>上一篇文章提到Java通过Executors来创建四种线程池, 进入源码我们会发现, 真正的线程池的实现为 <code>ThreadPoolExecutor</code> .</p>
-<h2 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor"></a>ThreadPoolExecutor</h2><pre><code>public ThreadPoolExecutor(int corePoolSize,
-  int maximumPoolSize,
-  long keepAliveTime,
-  TimeUnit unit,
-  BlockingQueue\&lt;Runnable\&gt; workQueue,
-  ThreadFactory threadFactory,
-  RejectedExecutionHandler handler) 
-</code></pre><p><code>ThreadPoolExecutor</code>的构造函数的参数用来配置线程池, 下面我们一个个来分析:</p>
-<ol>
-<li><p><code>corePoolSize</code> :线程池的核心线程数, 一般情况下不管有没有任务都会一直在线程池中一直存活, 只有在 <code>ThreadPoolExecutor</code>中的方法 <code>allowCoreThreadTimeOut(boolean value)</code> 设置为 <code>true</code>时, 闲置的核心线程会存在超时机制, 如果在指定时间没有新任务来时, 核心线程也会被终止, 而这个时间间隔由第3个属性 <code>keepAliveTime</code> 指定.</p>
-</li>
-<li><p><code>maximumPoolSize</code> : 线程池所能容纳的最大线程数, 当活动的线程数达到这个值后, 后续的新任务将会被阻塞.</p>
-</li>
-<li><p><code>keepAliveTime</code> : 控制线程闲置时的超时时长, 超过则终止该线程. 一般情况下用于非核心线程.只有在 <code>ThreadPoolExecutor</code>中的方法 <code>allowCoreThreadTimeOut(boolean value)</code> 设置为 <code>true</code>时, 也作用于核心线程.</p>
-</li>
-<li><p><code>unit</code> : 用于指定<code>keepAliveTime</code> 参数的时间单位, <code>TimeUnit</code> 是个enum枚举类型, 常用的有: TimeUnit.HOURS(小时)、TimeUnit.MINUTES(分钟)、TimeUnit.SECONDS(秒)和TimeUnit.MILLISECONDS(毫秒)等.</p>
-</li>
-<li><p><code>workQueue</code> : 线程池的任务队列, 通过线程池的<code>execute(Runnable command)</code>方法会将任务 <code>Runnable</code> 存储在队列中.</p>
-</li>
-<li><p><code>threadFactory</code> : 线程工厂, 它是一个接口, 就 <code>Thread newThread(Runnable r)</code>一个方法, 用来为线程池创建新线程的功能.</p>
-</li>
-<li><p><code>handler</code> : 当任务队列已满或者无法成功执行任务时, <code>ThreadPoolExecutor</code> 会通过 <code>handler</code> 的<code>rejectedExecution(Runnable r, ThreadPoolExecutor executor)</code>来通知调用者, 默认情况下回抛出一个<code>RejectedExecutionException</code>. 这个参数一般使用默认值,不常用.</p>
-</li>
-</ol>
-<blockquote>
-<p>上面是完整的构造函数, <code>ThreadPoolExecutor</code>还提供其他构造函数, 参数6 和 7 是可选的, 不配置则使用默认配置.</p>
-</blockquote>
-<h2 id="ThreadPoolExecutor-的核心实现-execute"><a href="#ThreadPoolExecutor-的核心实现-execute" class="headerlink" title="ThreadPoolExecutor 的核心实现: execute()"></a>ThreadPoolExecutor 的核心实现: execute()</h2><hr>
-<p> <strong>重头戏来了</strong>,由于源码封装较多,它的代码量也就下面几行:这边直接贴出来</p>
-<pre><code>public void execute(Runnable command) 
-if (command == null)
-throw new NullPointerException();
-int c = ctl.get();
-//如果运行中的线程少于核心线程的数量
-if (workerCountOf(c) \&lt; corePoolSize) 
-//启动一个核心线程来执行任务
-if (addWorker(command, true))
-return;
-//如果增加该线程失败时的情况,继续往下走
-c = ctl.get();
-}
-//如果一个任务被加入任务队列中
-if (isRunning(c) &amp;&amp; workQueue.offer(command)) 
-int recheck = ctl.get();
-//仍然需要仔细检查我们是否应该添加一个线程(因为上次检查存在的任务可能已经终止),或者在进入这个方法的时候线程池被关闭
-if (! isRunning(recheck) &amp;&amp; remove(command))
-reject(command);
-//然后再次检查有没有正在运行的线程
-else if (workerCountOf(recheck) == 0)
-addWorker(null, false);
-}
-//如果任务不能被加入任务队列,则尝试添加一个新线程去执行,如果失败了,也许可能任务已被取消或者任务队列已经饱和,所以拒绝任务.
-else if (!addWorker(command, false))
-reject(command);
-}
-</code></pre><blockquote>
-<p>ctl 体现了线程池的状态, 其中包含两个字段:<code>workerCount</code>(有效的线程数量) 和 <code>runState</code> (运行状态, 运行中、停止等等)</p>
-<p>reject(command)表示通知调用者任务队列已满或者无法成功执行任务</p>
-</blockquote>
-<p><code>ThreadPoolExecutor</code>执行任务的时候分了三步:</p>
-<ol>
-<li><p>如果运行中的线程少于核心线程的数量, 启动一个核心线程来执行任务.调用<code>addWorker()</code>时再次检查运行状态和工作线程数量,防止如果增加该线程失败时的情况,则返回false.</p>
-</li>
-<li><p>如果一个任务被加入任务队列中,仍然需要仔细检查我们是否应该添加一个线程(因为上次检查存在的任务可能已经终止),或者在进入这个方法的时候线程池被关闭.所以重新检查状态,如果需要的话在任务队列被取消的时候拒绝任务,然后再次检查有没有正在运行的线程,如果没有则创建一个新的线程去执行.</p>
-</li>
-<li><p>如果任务不能被加入任务队列,则尝试添加一个新线程去执行,如果失败了,也许可能任务已被取消或者任务队列已经饱和,所以拒绝任务.</p>
-</li>
-</ol>
-<blockquote>
-<p>好啦! 对Java线程池的运行原理也了解的差不多了, 希望对大家的学习有所帮助</p>
-<p>最后, 提醒大家,千万别看完就忘了哦, 要学以致用!</p>
-</blockquote>
-
+<p>相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?<br>
       
     </div>
     
@@ -362,6 +288,10 @@ reject(command);
 	</div>
 
 
+      
+        <p class="article-more-link">
+          <a  href="/2016/07/28/再续Java线程池/#more">more >></a>
+        </p>
       
       <div class="clearfix"></div>
     </div>
@@ -406,64 +336,8 @@ reject(command);
     <div class="article-entry" itemprop="articleBody">
       
         <p>111</p>
-<h1 id="话不多说-关键是这张图"><a href="#话不多说-关键是这张图" class="headerlink" title="话不多说, 关键是这张图!!!!"></a>话不多说, 关键是这张图!!!!</h1><p><img src="http://i.imgur.com/v58Rg6n.png" alt=""><br>这里附上原图截取的网页链接, 本文也引用其内容:<br><a href="http://nvie.com/posts/a-successful-git-branching-model/" target="_blank" rel="external">http://nvie.com/posts/a-successful-git-branching-model/</a></p>
+<h1 id="话不多说-关键是这张图"><a href="#话不多说-关键是这张图" class="headerlink" title="话不多说, 关键是这张图!!!!"></a>话不多说, 关键是这张图!!!!</h1><p><img src="http://i.imgur.com/v58Rg6n.png" alt=""><br>这里附上原图截取的网页链接, 本文也引用其内容:<br><a href="http://nvie.com/posts/a-successful-git-branching-model/">http://nvie.com/posts/a-successful-git-branching-model/</a></p>
 <p>如果对上图看的有点懵懵懂懂的,可以看完下面介绍再回过头来看这张图,感觉会清晰很多.</p>
-<p>\&lt;!–more–></p>
-<hr>
-<h1 id="1-Git-Flow-是什么"><a href="#1-Git-Flow-是什么" class="headerlink" title="1.  Git Flow 是什么"></a>1.  Git Flow 是什么</h1><p>(这里给大家简单介绍下概念)<br>Git Flow是构建在Git之上的一个组织软件开发活动的模型，是在Git之上构建的一项软件开发最佳实践。Git Flow是一套使用Git进行源代码管理时的一套行为规范和简化部分Git操作的工具。</p>
-<p>2010年5月，在一篇名为“一种成功的Git分支模型”的博文中，@nvie介绍了一种在Git之上的软件开发模型。通过利用Git创建和管理分支的能力，为每个分支设定具有特定的含义名称，并将软件生命周期中的各类活动归并到不同的分支上。实现了软件开发过程不同操作的相互隔离。这种软件开发的活动模型被nwie称为“Git Flow”。</p>
-<p>一般而言，软件开发模型有常见的瀑布模型、迭代开发模型、以及最近出现的敏捷开发模型等不同的模型。每种模型有各自应用场景。Git Flow重点解决的是由于源代码在开发过程中的各种冲突导致开发活动混乱的问题。因此，Git flow可以很好的于各种现有开发模型相结合使用。</p>
-<hr>
-<h1 id="2-Git-Flow中的分支"><a href="#2-Git-Flow中的分支" class="headerlink" title="2. Git Flow中的分支"></a>2. Git Flow中的分支</h1><p>Git Flow模型中定义了主分支和辅助分支两类分支。其中主分支用于组织与软件开发、部署相关的活动；辅助分支组织为了解决特定的问题而进行的各种开发活动。</p>
-<h2 id="2-1-主分支"><a href="#2-1-主分支" class="headerlink" title="2.1 主分支"></a>2.1 主分支</h2><p>主分支是所有开发活动的核心分支。所有的开发活动产生的输出物最终都会反映到主分支的代码中。主分支分为master分支和development分支。</p>
-<p><img src="http://i.imgur.com/aUDUgPc.png" alt=""></p>
-<h3 id="master分支"><a href="#master分支" class="headerlink" title="master分支"></a>master分支</h3><p>master分支上存放的应该是随时可供在生产环境中部署的代码（Production Ready state）。当开发活动告一段落，产生了一份新的可供部署的代码时，master分支上的代码会被更新。同时，每一次更新，最好添加对应的版本号标签（TAG）。</p>
-<h3 id="develop分支"><a href="#develop分支" class="headerlink" title="develop分支"></a>develop分支</h3><p>develop分支是保存当前最新开发成果的分支。通常这个分支上的代码也是可进行每日夜间发布的代码（Nightly build）。因此这个分支有时也可以被称作“integration branch”。</p>
-<p>当develop分支上的代码已实现了软件需求说明书中所有的功能，通过了所有的测试后，并且代码已经足够稳定时，就可以将所有的开发成果合并回master分支了。对于master分支上的新提交的代码建议都打上一个新的版本号标签（TAG），供后续代码跟踪使用。</p>
-<p>因此，每次将develop分支上的代码合并回master分支时，我们都可以认为一个新的可供在生产环境中部署的版本就产生了。通常而言，“仅在发布新的可供部署的代码时才更新master分支上的代码”是推荐所有人都遵守的行为准则。基于此，理论上说，每当有代码提交到master分支时，我们可以使用Git Hook触发软件自动测试以及生产环境代码的自动更新工作。这些自动化操作将有利于减少新代码发布之后的一些事务性工作。</p>
-<h2 id="2-2-辅助分支"><a href="#2-2-辅助分支" class="headerlink" title="2.2  辅助分支"></a>2.2  辅助分支</h2><p>辅助分支是用于组织解决特定问题的各种软件开发活动的分支。辅助分支主要用于组织软件新功能的并行开发、简化新功能开发代码的跟踪、辅助完成版本发布工作以及对生产代码的缺陷进行紧急修复工作。这些分支与主分支不同，通常只会在有限的时间范围内存在。</p>
-<p>辅助分支包括：</p>
-<ul>
-<li>用于开发新功能时所使用的feature分支；</li>
-<li>用于辅助版本发布的release分支；</li>
-<li>用于修正生产代码中的缺陷的hotfix分支。</li>
-</ul>
-<p>以上这些分支都有固定的使用目的和分支操作限制。从单纯技术的角度说，这些分支与Git其他分支并没有什么区别，但通过命名，我们定义了使用这些分支的方法。</p>
-<h3 id="feature分支"><a href="#feature分支" class="headerlink" title="feature分支"></a>feature分支</h3><p>使用规范：</p>
-<ul>
-<li>可以从develop分支发起feature分支</li>
-<li>代码必须合并回develop分支</li>
-<li>feature分支的命名可以使用除master，develop，release-<em>，hotfix-</em>之外的任何名称</li>
-</ul>
-<p>feature分支（有时也可以被叫做“topic分支”）通常是在开发一项新的软件功能的时候使用，这个分支上的代码变更最终合并回develop分支或者干脆被抛弃掉（例如实验性且效果不好的代码变更）。</p>
-<p>一般而言，feature分支代码可以保存在开发者自己的代码库中而不强制提交到主代码库里。</p>
-<p><img src="http://i.imgur.com/wgL4xlI.png" alt=""></p>
-<h3 id="release分支"><a href="#release分支" class="headerlink" title="release分支"></a>release分支</h3><p>使用规范：</p>
-<ul>
-<li>可以从develop分支派生</li>
-<li>必须合并回develop分支和master分支</li>
-<li>分支命名惯例：release-*</li>
-</ul>
-<p>release分支是为发布新的产品版本而设计的。在这个分支上的代码允许做小的缺陷修正、准备发布版本所需的各项说明信息（版本号、发布时间、编译时间等等）。通过在release分支上进行这些工作可以让develop分支空闲出来以接受新的feature分支上的代码提交，进入新的软件开发迭代周期。</p>
-<p>当develop分支上的代码已经包含了所有即将发布的版本中所计划包含的软件功能，并且已通过所有测试时，我们就可以考虑准备创建release分支了。而所有在当前即将发布的版本之外的业务需求一定要确保不能混到release分支之内（避免由此引入一些不可控的系统缺陷）。</p>
-<p>成功的派生了release分支，并被赋予版本号之后，develop分支就可以为“下一个版本”服务了。所谓的“下一个版本”是在当前即将发布的版本之后发布的版本。版本号的命名可以依据项目定义的版本号命名规则进行。</p>
-<h3 id="hotfix分支"><a href="#hotfix分支" class="headerlink" title="hotfix分支"></a>hotfix分支</h3><p>使用规范：</p>
-<ul>
-<li>可以从master分支派生</li>
-<li>必须合并回master分支和develop分支</li>
-<li>分支命名惯例：hotfix-*</li>
-</ul>
-<p>除了是计划外创建的以外，hotfix分支与release分支十分相似：都可以产生一个新的可供在生产环境部署的软件版本。</p>
-<p>当生产环境中的软件遇到了异常情况或者发现了严重到必须立即修复的软件缺陷的时候，就需要从master分支上指定的TAG版本派生hotfix分支来组织代码的紧急修复工作。</p>
-<p>这样做的显而易见的好处是不会打断正在进行的develop分支的开发工作，能够让团队中负责新功能开发的人与负责代码紧急修复的人并行的开展工作。</p>
-<p><img src="http://i.imgur.com/zNRR6zf.png" alt=""></p>
-<hr>
-<h1 id="更进一步"><a href="#更进一步" class="headerlink" title="更进一步"></a>更进一步</h1><p>Git Flow开发模型从源代码管理角度对通常意义上的软件开发活动进行了约束。应该说，为我们的软件开发提供了一个可供参考的管理模型。Git Flow开发模型让nvie的开发代码仓库保持整洁，让小组各个成员之间的开发相互隔离，能够有效避免处于开发状态中的代码相互影响而导致的效率低下和混乱。</p>
-<p>所谓模型，在不同的开发团队，不同的文化，不同的项目背景情况下都有可能需要进行适当的裁剪或扩充。祝各位好运！</p>
-<p>PS：为了简化使用Git Flow模型时Git指令的复杂性，nvie开发出了一套git增强指令集。可以运行于Windows、Linux、Unix和Mac操作系统之下。有兴趣的同学可以去看看。</p>
-<p>这里附上github链接.<a href="https://github.com/nvie/gitflow" target="_blank" rel="external">https://github.com/nvie/gitflow</a></p>
-<p>希望对大家有所帮助,谢谢!</p>
-
       
     </div>
     
@@ -481,66 +355,9 @@ reject(command);
 
 
       
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/07/27/hello-world/" class="article-date">
-  	<time datetime="2016-07-27T07:25:13.000Z" itemprop="datePublished">2016-07-27</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/07/27/hello-world/">Hello World</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Welcome to <a href="https://hexo.io/" target="_blank" rel="external">Hexo</a>! This is your very first post. Check <a href="https://hexo.io/docs/" target="_blank" rel="external">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a href="https://hexo.io/docs/troubleshooting.html" target="_blank" rel="external">troubleshooting</a> or you can ask me on <a href="https://github.com/hexojs/hexo/issues" target="_blank" rel="external">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><p>``` bash<br>$ hexo new “My New Post”<br>```</p>
-<p>More info: <a href="https://hexo.io/docs/writing.html" target="_blank" rel="external">Writing</a></p>
-<h3 id="Run-server"><a href="#Run-server" class="headerlink" title="Run server"></a>Run server</h3><p>``` bash<br>$ hexo server<br>```</p>
-<p>More info: <a href="https://hexo.io/docs/server.html" target="_blank" rel="external">Server</a></p>
-<h3 id="Generate-static-files"><a href="#Generate-static-files" class="headerlink" title="Generate static files"></a>Generate static files</h3><p>``` bash<br>$ hexo generate<br>```</p>
-<p>More info: <a href="https://hexo.io/docs/generating.html" target="_blank" rel="external">Generating</a></p>
-<h3 id="Deploy-to-remote-sites"><a href="#Deploy-to-remote-sites" class="headerlink" title="Deploy to remote sites"></a>Deploy to remote sites</h3><p>``` bash<br>$ hexo deploy<br>```</p>
-<p>More info: <a href="https://hexo.io/docs/deployment.html" target="_blank" rel="external">Deployment</a></p>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-      
-
+        <p class="article-more-link">
+          <a  href="/2016/07/27/git-flow/#more">more >></a>
+        </p>
       
       <div class="clearfix"></div>
     </div>
@@ -1038,10 +855,10 @@ public void run() throws Exception {
 
 
   
-    <article id="post-OkHttp" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-Interceptors" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/2016/03/11/OkHttp/" class="article-date">
+      <a href="/2016/03/11/Interceptors/" class="article-date">
   	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
 </a>
     </div>
@@ -1055,7 +872,7 @@ public void run() throws Exception {
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/11/OkHttp/">Okhttp</a>
+      <a class="article-title" href="/2016/03/11/Interceptors/">Okhttp-wiki 之 Interceptors 拦截器</a>
     </h1>
   
 
@@ -1064,27 +881,180 @@ public void run() throws Exception {
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Okhttp"><a href="#Okhttp" class="headerlink" title="Okhttp"></a>Okhttp</h1><h2 id="An-HTTP-amp-HTTP-2-client-for-Android-and-Java-applications-用于Android和Java应用程序HTTP和HTTP-2的客户端"><a href="#An-HTTP-amp-HTTP-2-client-for-Android-and-Java-applications-用于Android和Java应用程序HTTP和HTTP-2的客户端" class="headerlink" title="An HTTP &amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端"></a>An HTTP &amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端</h2><h3 id="Overview-描述"><a href="#Overview-描述" class="headerlink" title="Overview 描述"></a>Overview 描述</h3><p>HTTP is the way modern applications network. It’s how we exchange data &amp; media. Doing HTTP efficiently makes your stuff load faster and saves bandwidth.</p>
-<p>HTTP是拉近网络应用程序的方式.这是我们如何交换数据和媒体.使用HTTP有效地使你的东西加载更快,节省带宽.<br>\&lt;!–more–><br>OkHttp is an HTTP client that’s efficient by default:</p>
-<ul>
-<li>HTTP/2 support allows all requests to the same host to share a socket.</li>
-<li>Connection pooling reduces request latency (if HTTP/2 isn’t available).</li>
-<li>Transparent GZIP shrinks download sizes.</li>
-<li>Response caching avoids the network completely for repeat requests.</li>
+        <h1 id="Okhttp-wiki-之-Interceptors-拦截器"><a href="#Okhttp-wiki-之-Interceptors-拦截器" class="headerlink" title="Okhttp-wiki 之 Interceptors 拦截器"></a>Okhttp-wiki 之 Interceptors 拦截器</h1><p>Interceptors are a powerful mechanism that can monitor, rewrite, and retry calls. Here’s a simple interceptor that logs the outgoing request and the incoming response.</p>
+<p>拦截器是一种强大的机制,可以监视、重写和重试调用.下面是一个简单例子,拦截发出的请求和传入的响应的日志.</p>
+<pre><code>class LoggingInterceptor implements Interceptor {
+  @Override public Response intercept(Interceptor.Chain chain) throws IOException {
+    Request request = chain.request();
+
+    long t1 = System.nanoTime();
+    logger.info(String.format(&quot;Sending request %s on %s%n%s&quot;,
+        request.url(), chain.connection(), request.headers()));
+
+    Response response = chain.proceed(request);
+
+    long t2 = System.nanoTime();
+    logger.info(String.format(&quot;Received response for %s in %.1fms%n%s&quot;,
+        response.request().url(), (t2 - t1) / 1e6d, response.headers()));
+
+    return response;
+  }
+}
+</code></pre><p>A call to <code>chain.proceed(request)</code> is a critical part of each interceptor’s implementation. This simple-looking method is where all the HTTP work happens, producing a response to satisfy the request.</p>
+<p>调用 <code>chain.proceed(request)</code> 是每个拦截器的关键部分的实现.这个简单的方法存在所有HTTP工作发生的地方,生产满足请求的响应.</p>
+<p>Interceptors can be chained. Suppose you have both a compressing interceptor and a checksumming interceptor: you’ll need to decide whether data is compressed and then checksummed, or checksummed and then compressed. OkHttp uses lists to track interceptors, and interceptors are called in order.</p>
+<p>拦截器可以多个链接.假设您有一个压缩拦截器和校验拦截器:你需要决定数据是先压缩然后校验,还是先校验后压缩.OkHttp使用列表追踪拦截器,拦截器按顺序被调用。</p>
+<p><img src="http://upload-images.jianshu.io/upload_images/1504154-8daf5fd9540545d3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h2 id="Application-Interceptors-应用拦截器"><a href="#Application-Interceptors-应用拦截器" class="headerlink" title="Application Interceptors 应用拦截器"></a>Application Interceptors 应用拦截器</h2><p>Interceptors are registered as either application or network interceptors. We’ll use the <code>LoggingInterceptor</code> defined above to show the difference.</p>
+<p>拦截器可以被应用程序或网络注册,我们将使用上面定义的 <code>LoggingInterceptor</code> 显示两者之间的差异.</p>
+<p>Register an application interceptor by calling <code>addInterceptor()</code> on:</p>
+<p>注册一个应用拦截器通过 <code>OkHttpClient.Builder</code>调用 <code>addInterceptor()</code>:</p>
+<pre><code>OkHttpClient client = new OkHttpClient.Builder()
+    .addInterceptor(new LoggingInterceptor())
+    .build();
+
+Request request = new Request.Builder()
+    .url(&quot;http://www.publicobject.com/helloworld.txt&quot;)
+    .header(&quot;User-Agent&quot;, &quot;OkHttp Example&quot;)
+    .build();
+
+Response response = client.newCall(request).execute();
+response.body().close();
+</code></pre><p>The URL <code>http://www.publicobject.com/helloworld.txt</code> redirects to <code>https://publicobject.com/helloworld.txt</code>, and OkHttp follows this redirect automatically. Our application interceptor is called once and the response returned from <code>chain.proceed()</code> has the redirected response:</p>
+<p>URL <code>http://www.publicobject.com/helloworld.txt</code> 重定向到 <code>https://publicobject.com/helloworld.txt</code>, OkHttp 将会自动跟随这个重定向. 我们的应用拦截器被调用一次,响应通过 <code>chain.proceed()</code> 返回重定向的响应:</p>
+<pre><code>INFO: Sending request http://www.publicobject.com/helloworld.txt on null
+User-Agent: OkHttp Example
+
+INFO: Received response for https://publicobject.com/helloworld.txt in 1179.7ms
+Server: nginx/1.4.6 (Ubuntu)
+Content-Type: text/plain
+Content-Length: 1759
+Connection: keep-alive
+</code></pre><p>We can see that we were redirected because <code>response.request().url()</code> is different from <code>request.url()</code>. The two log statements log two different URLs.</p>
+<p>我们可以看到调用被重定向了,因为 <code>response.request().url()</code> 不同于 <code>request.url()</code>. 两个日志语句打印出两个不同的url.</p>
+<h2 id="Network-Interceptors-网络拦截器"><a href="#Network-Interceptors-网络拦截器" class="headerlink" title="Network Interceptors 网络拦截器"></a>Network Interceptors 网络拦截器</h2><p>Registering a network interceptor is quite similar. Call <code>addNetworkInterceptor()</code> instead of <code>addInterceptor()</code>:</p>
+<p>注册一个网络拦截器和上面非常相似. 调用 <code>addNetworkInterceptor()</code> 来代替 <code>addInterceptor()</code>:</p>
+<pre><code>OkHttpClient client = new OkHttpClient.Builder()
+    .addNetworkInterceptor(new LoggingInterceptor())
+    .build();
+
+Request request = new Request.Builder()
+    .url(&quot;http://www.publicobject.com/helloworld.txt&quot;)
+    .header(&quot;User-Agent&quot;, &quot;OkHttp Example&quot;)
+    .build();
+
+Response response = client.newCall(request).execute();
+response.body().close();
+</code></pre><p>When we run this code, the interceptor runs twice. Once for the initial request to <code>http://www.publicobject.com/helloworld.txt</code>, and another for the redirect to <code>https://publicobject.com/helloworld.txt</code>.</p>
+<p>当我们运行这段代码时,拦截器运行两次.第一次是初始化请求到 <code>http://www.publicobject.com/helloworld.txt</code>的时候调用,另一个用于重定向到 <code>https://publicobject.com/helloworld.txt</code>的时候.</p>
+<pre><code>INFO: Sending request http://www.publicobject.com/helloworld.txt on Connection{www.publicobject.com:80, proxy=DIRECT hostAddress=54.187.32.157 cipherSuite=none protocol=http/1.1}
+User-Agent: OkHttp Example
+Host: www.publicobject.com
+Connection: Keep-Alive
+Accept-Encoding: gzip
+
+INFO: Received response for http://www.publicobject.com/helloworld.txt in 115.6ms
+Server: nginx/1.4.6 (Ubuntu)
+Content-Type: text/html
+Content-Length: 193
+Connection: keep-alive
+Location: https://publicobject.com/helloworld.txt
+
+INFO: Sending request https://publicobject.com/helloworld.txt on Connection{publicobject.com:443, proxy=DIRECT hostAddress=54.187.32.157 cipherSuite=TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA protocol=http/1.1}
+User-Agent: OkHttp Example
+Host: publicobject.com
+Connection: Keep-Alive
+Accept-Encoding: gzip
+
+INFO: Received response for https://publicobject.com/helloworld.txt in 80.9ms
+Server: nginx/1.4.6 (Ubuntu)
+Content-Type: text/plain
+Content-Length: 1759
+Connection: keep-alive
+</code></pre><p>The network requests also contain more data, such as the <code>Accept-Encoding: gzip</code> header added by OkHttp to advertise support for response compression. The network interceptor’s <code>Chain</code> has a non-null <code>Connection</code> that can be used to interrogate the IP address and TLS configuration that were used to connect to the webserver.</p>
+<p>网络请求也包含更多的数据,如 <code>Accept-Encoding: gzip</code> 头信息, OkHttp添加该头信息来通知并支持响应的压缩。网络拦截器链有一个非空连接,可用于查询用于连接到网络服务器的IP地址和TLS配置。</p>
+<h2 id="Choosing-between-application-and-network-interceptors-在应用和网络拦截器之间做选择"><a href="#Choosing-between-application-and-network-interceptors-在应用和网络拦截器之间做选择" class="headerlink" title="Choosing between application and network interceptors 在应用和网络拦截器之间做选择"></a>Choosing between application and network interceptors 在应用和网络拦截器之间做选择</h2><p>Each interceptor chain has relative merits.</p>
+<p>每个拦截器链都有自己的优点.</p>
+<h3 id="Application-interceptors"><a href="#Application-interceptors" class="headerlink" title="Application interceptors"></a>Application interceptors</h3><ul>
+<li>Don’t need to worry about intermediate responses like redirects and retries.</li>
+<li>Are always invoked once, even if the HTTP response is served from the cache.</li>
+<li>Observe the application’s original intent. Unconcerned with OkHttp-injected headers like <code>If-None-Match</code>.</li>
+<li>Permitted to short-circuit and not call <code>Chain.proceed()</code>.</li>
+<li>Permitted to retry and make multiple calls to <code>Chain.proceed()</code>.</li>
 </ul>
-<p>OkHttp就是一个有效的HTTP客户端:</p>
-<ul>
-<li>HTTP/2的支持允许所有请求在相同的主机上共享一个socket.</li>
-<li>连接池可以减少请求延迟(如果HTTP/2则不可使用).</li>
-<li>透明的压缩可以减少下载大小.</li>
-<li>响应缓存避免了网络重复完整的请求.</li>
+<h3 id="应用拦截器"><a href="#应用拦截器" class="headerlink" title="应用拦截器"></a>应用拦截器</h3><ul>
+<li>不需要担心中间过程的响应,如重定向和重试.</li>
+<li>总是只调用一次,即使HTTP响应是从缓存中获取.</li>
+<li>观察应用程序的初衷. 不关心OkHttp注入的头信息如: <code>If-None-Match</code>.</li>
+<li>允许短路而不调用 <code>Chain.proceed()</code>,即中止调用.</li>
+<li>允许重试,使 <code>Chain.proceed()</code>调用多次.</li>
 </ul>
-<p>OkHttp perseveres when the network is troublesome: it will silently recover from common connection problems. If your service has multiple IP addresses OkHttp will attempt alternate addresses if the first connect fails. This is necessary for IPv4+IPv6 and for services hosted in redundant data centers. OkHttp initiates new connections with modern TLS features (SNI, ALPN), and falls back to TLS 1.0 if the handshake fails.</p>
-<p>当网络出现问题时OkHttp会坚守着:它会悄然从常见的连接问题中恢复过来.如果你的服务有多个IP地址,如果第一个连接失败OkHttp将尝试备用地址.对IPv4 + IPv6和服务来说托管在冗余的数据中心是必要的.OkHttp发起最新TLS特性(SNI ALPN)的新连接,如果握手失败则回退至TLS 1.0.</p>
-<p>Using OkHttp is easy. Its request/response API is designed with fluent builders and immutability. It supports both synchronous blocking calls and async calls with callbacks.</p>
-<p>使用OkHttp很容易.它的请求/响应的API设计拥有流畅的建造器和不变性.它同时支持同步阻塞调用和异步回调调用.</p>
-<p>OkHttp supports Android 2.3 and above. For Java, the minimum requirement is 1.7.</p>
-<p>OkHttp支持Android 2.3及以上.对于Java,最低要求是1.7.</p>
+<h3 id="Network-Interceptors"><a href="#Network-Interceptors" class="headerlink" title="Network Interceptors"></a>Network Interceptors</h3><ul>
+<li>Able to operate on intermediate responses like redirects and retries.</li>
+<li>Not invoked for cached responses that short-circuit the network.</li>
+<li>Observe the data just as it will be transmitted over the network.</li>
+<li>Access to the <code>Connection</code> that carries the request.</li>
+</ul>
+<h3 id="网络拦截器"><a href="#网络拦截器" class="headerlink" title="网络拦截器"></a>网络拦截器</h3><ul>
+<li>能够操作中间过程的响应,如重定向和重试.</li>
+<li>当网络短路而返回缓存响应时不被调用.</li>
+<li>只观察在网络上传输的数据.</li>
+<li>携带请求来访问连接.</li>
+</ul>
+<h2 id="Rewriting-Requests-重写请求"><a href="#Rewriting-Requests-重写请求" class="headerlink" title="Rewriting Requests 重写请求"></a>Rewriting Requests 重写请求</h2><p>Interceptors can add, remove, or replace request headers. They can also transform the body of those requests that have one. For example, you can use an application interceptor to add request body compression if you’re connecting to a webserver known to support it.</p>
+<p>拦截器可以添加、删除或替换请求头信息.他们还可以改变的请求携带的实体.例如, 如果你连接到一个支持压缩的网络服务器你可以使用一个应用拦截器来添加请求实体压缩.</p>
+<pre><code>/** This interceptor compresses the HTTP request body. Many webservers can&apos;t handle this! */
+/** 这个拦截器压缩了请求实体. 很多网络服务器无法处理它 */
+final class GzipRequestInterceptor implements Interceptor {
+  @Override public Response intercept(Interceptor.Chain chain) throws IOException {
+    Request originalRequest = chain.request();
+    if (originalRequest.body() == null || originalRequest.header(&quot;Content-Encoding&quot;) != null) {
+      return chain.proceed(originalRequest);
+    }
+
+    Request compressedRequest = originalRequest.newBuilder()
+        .header(&quot;Content-Encoding&quot;, &quot;gzip&quot;)
+        .method(originalRequest.method(), gzip(originalRequest.body()))
+        .build();
+    return chain.proceed(compressedRequest);
+  }
+
+  private RequestBody gzip(final RequestBody body) {
+    return new RequestBody() {
+      @Override public MediaType contentType() {
+        return body.contentType();
+      }
+
+      @Override public long contentLength() {
+        return -1; // We don&apos;t know the compressed length in advance!
+      }
+
+      @Override public void writeTo(BufferedSink sink) throws IOException {
+        BufferedSink gzipSink = Okio.buffer(new GzipSink(sink));
+        body.writeTo(gzipSink);
+        gzipSink.close();
+      }
+    };
+  }
+}
+</code></pre><h2 id="Rewriting-Responses-重写响应"><a href="#Rewriting-Responses-重写响应" class="headerlink" title="Rewriting Responses 重写响应"></a>Rewriting Responses 重写响应</h2><p>Symmetrically, interceptors can rewrite response headers and transform the response body. This is generally more dangerous than rewriting request headers because it may violate the webserver’s expectations!</p>
+<p>与重写请求对称,拦截器可以重写响应头信息和改变响应实体.这通常比重写请求头信息更加危险,因为它可能违反网络服务器的期望!</p>
+<p>If you’re in a tricky situation and prepared to deal with the consequences, rewriting response headers is a powerful way to work around problems. For example, you can fix a server’s misconfigured <code>Cache-Control</code> response header to enable better response caching:</p>
+<p>如果你在一个棘手的情况下,准备处理结果,重写响应头信息是一种强大的解决问题的方式.例如,您可以修复一个服务器配置错误的 <code>Cache-Control</code> 响应头信息,来确保更好的响应缓存:</p>
+<pre><code>/** Dangerous interceptor that rewrites the server&apos;s cache-control header. */
+/** 重写服务器 cache-control 头信息的拦截器是危险的. */
+private static final Interceptor REWRITE_CACHE_CONTROL_INTERCEPTOR = new Interceptor() {
+  @Override public Response intercept(Interceptor.Chain chain) throws IOException {
+    Response originalResponse = chain.proceed(chain.request());
+    return originalResponse.newBuilder()
+        .header(&quot;Cache-Control&quot;, &quot;max-age=60&quot;)
+        .build();
+  }
+};
+</code></pre><p>Typically this approach works best when it complements a corresponding fix on the webserver!</p>
+<p>通常这种方法最好实现在相应的网络服务器上!</p>
+<h2 id="Availability-可用性"><a href="#Availability-可用性" class="headerlink" title="Availability 可用性"></a>Availability 可用性</h2><p>OkHttp’s interceptors require OkHttp 2.2 or better. Unfortunately, interceptors do not work with <code>OkUrlFactory</code>, or the libraries that build on it, including <a href="http://square.github.io/retrofit/" target="_blank" rel="external">Retrofit</a> ≤ 1.8 and <a href="http://square.github.io/picasso/" target="_blank" rel="external">Picasso</a> ≤ 2.4.</p>
+<p>OkHttp的拦截器需要OkHttp 2.2或以上.不幸的是,拦截器不能和 <code>OkUrlFactory</code>同时工作,或其他库的构建,包括 <a href="http://square.github.io/retrofit/" target="_blank" rel="external">Retrofit</a> ≤ 1.8和 <a href="http://square.github.io/picasso/" target="_blank" rel="external">Picasso</a> ≤ 2.4.</p>
 <hr>
 <p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
 <ol>
@@ -1092,244 +1062,7 @@ public void run() throws Exception {
 <li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
 <li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
 <li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
-<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
-<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
-</ol>
-<h3 id="Download-下载"><a href="#Download-下载" class="headerlink" title="Download 下载"></a>Download 下载</h3><p>Okhttp’s <a href="https://search.maven.org/remote_content?g=com.squareup.okhttp3&amp;a=okhttp&amp;v=LATEST" target="_blank" rel="external">Latest JAR</a></p>
-<p>You’ll also need <a href="http://github.com/square/okio" target="_blank" rel="external">Okio</a>, which OkHttp uses for fast I/O and resizable buffers. Download the <a href="https://search.maven.org/remote_content?g=com.squareup.okio&amp;a=okio&amp;v=LATEST" target="_blank" rel="external">latest JAR</a>.</p>
-<p>你将还需要 <a href="http://github.com/square/okio" target="_blank" rel="external">Okio</a>,OkHttp用来快速I/O和可调整大小的缓冲区.下载<a href="https://search.maven.org/remote_content?g=com.squareup.okio&amp;a=okio&amp;v=LATEST" target="_blank" rel="external">最新的JAR</a>。</p>
-<p>The source code to OkHttp, its samples, and this website is available on <a href="http://github.com/square/okhttp" target="_blank" rel="external">GitHub</a>.</p>
-<p>OkHttp的源代码,其示例,可以在这个网站上看到: <a href="http://github.com/square/okhttp" target="_blank" rel="external">GitHub</a>.</p>
-<h4 id="MAVEN"><a href="#MAVEN" class="headerlink" title="MAVEN"></a>MAVEN</h4><pre><code>&lt;dependency&gt;
-  &lt;groupId&gt;com.squareup.okhttp3&lt;/groupId&gt;
-  &lt;artifactId&gt;okhttp&lt;/artifactId&gt;
-  &lt;version&gt;(insert latest version)&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre><h4 id="GRADLE"><a href="#GRADLE" class="headerlink" title="GRADLE"></a>GRADLE</h4><pre><code>compile &apos;com.squareup.okhttp3:okhttp:(insert latest version)&apos;
-</code></pre>
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Connections" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/03/11/Connections/" class="article-date">
-  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/11/Connections/">Okhttp-wiki 之 Connections 连接</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Okhttp-wiki-之-Connections-连接"><a href="#Okhttp-wiki-之-Connections-连接" class="headerlink" title="Okhttp-wiki 之 Connections 连接"></a>Okhttp-wiki 之 Connections 连接</h1><p>Although you provide only the URL, OkHttp plans its connection to your webserver using three types: URL, Address, and Route.</p>
-<p>虽然你只需要提供URL,但OkHttp计划它连接到您的网络服务器需要使用三种类型:URL,地址和路线.</p>
-<h2 id="URLs"><a href="#URLs" class="headerlink" title="URLs"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/HttpUrl.html" target="_blank" rel="external">URLs</a></h2><p>URLs (like <a href="https://github.com/square/okhttp" target="_blank" rel="external">https://github.com/square/okhttp</a>) are fundamental to HTTP and the Internet. In addition to being a universal, decentralized naming scheme for everything on the web, they also specify how to access web resources.</p>
-<p>URLs(例如<a href="https://github.com/square/okhttp)是HTTP和互联网的基础。除了网络所有事物普遍的、分散的命名方案之外,他们还指定如何访问网络资源" target="_blank" rel="external">https://github.com/square/okhttp)是HTTP和互联网的基础。除了网络所有事物普遍的、分散的命名方案之外,他们还指定如何访问网络资源</a>.</p>
-<p>URLs are abstract:</p>
-<ul>
-<li>They specify that the call may be plaintext (http) or encrypted (https), but not which cryptographic algorithms should be used. Nor do they specify how to verify the peer’s certificates (the <a href="http://developer.android.com/reference/javax/net/ssl/HostnameVerifier.html" target="_blank" rel="external">HostnameVerifier</a>) or which certificates can be trusted (the <a href="http://developer.android.com/reference/org/apache/http/conn/ssl/SSLSocketFactory.html" target="_blank" rel="external">SSLSocketFactory</a>).</li>
-<li>They don’t specify whether a specific proxy server should be used or how to authenticate with that proxy server.</li>
-</ul>
-<p>URLs 是抽象的:</p>
-<ul>
-<li>他们指定的调用可能是明文的(http)或加密的(https),但不使用任何加密算法。他们也不指定如何验证对等的证书(<a href="http://developer.android.com/reference/javax/net/ssl/HostnameVerifier.html" target="_blank" rel="external">HostnameVerifier</a>)或哪个证书可以被信任(<a href="http://developer.android.com/reference/org/apache/http/conn/ssl/SSLSocketFactory.html" target="_blank" rel="external">SSLSocketFactory</a>)。</li>
-<li>他们没有指定是否应该使用一个特定的代理服务器或使用该代理服务器进行身份验证。</li>
-</ul>
-<p>They’re also concrete: each URL identifies a specific path (like /square/okhttp) and query (like ?q=sharks&amp;lang=en). Each webserver hosts many URLs.</p>
-<p>他们也很具体:每个URL标识一个特定的路径(比如/square/okhttp)和询问(? q = sharks&amp;lang = en).每一个网络服务器主导很多url.</p>
-<h2 id="Addresses-地址"><a href="#Addresses-地址" class="headerlink" title="Addresses 地址"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Address.html" target="_blank" rel="external">Addresses 地址</a></h2><p>Addresses specify a webserver (like github.com) and all of the <strong>static</strong> configuration necessary to connect to that server: the port number, HTTPS settings, and preferred network protocols (like HTTP/2 or SPDY).</p>
-<p>地址指定一个网络服务器(比如github.com)和连接到服务器必要的所有的<strong>静态</strong>配置:端口号,HTTPS设置和首选网络协议(如HTTP/2 or SPDY)。</p>
-<p>URLs that share the same address may also share the same underlying TCP socket connection. Sharing a connection has substantial performance benefits: lower latency, higher throughput (due to <a href="http://www.igvita.com/2011/10/20/faster-web-vs-tcp-slow-start/" target="_blank" rel="external">TCP slow start</a>) and conserved battery. OkHttp uses a <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionPool.html" target="_blank" rel="external">ConnectionPool</a> that automatically reuses HTTP/1.x connections and multiplexes HTTP/2 and SPDY connections.</p>
-<p>URLs共享相同的地址也可以共享相同的底层TCP socket连接。共享一个连接有巨大的性能优势:低延迟、高吞吐量(由于<a href="http://www.igvita.com/2011/10/20/faster-web-vs-tcp-slow-start/" target="_blank" rel="external">TCP慢启动</a>)和保守的电量。OkHttp使用<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionPool.html" target="_blank" rel="external">连接池</a>自动重用HTTP/1.x连接和多样的HTTP/2 and SPDY 连接.</p>
-<p>In OkHttp some fields of the address come from the URL (scheme, hostname, port) and the rest come from the <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/OkHttpClient.html" target="_blank" rel="external">OkHttpClient</a>.</p>
-<p>在OkHttp中一些地址的字段来自URL(计划、主机名、端口),其余来自<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/OkHttpClient.html" target="_blank" rel="external">OkHttpClient</a>.</p>
-<h2 id="Routes-线路"><a href="#Routes-线路" class="headerlink" title="Routes 线路"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Route.html" target="_blank" rel="external">Routes 线路</a></h2><p>Routes supply the <strong>dynamic</strong> information necessary to actually connect to a webserver. This is the specific IP address to attempt (as discovered by a DNS query), the exact proxy server to use (if a <a href="http://developer.android.com/reference/java/net/ProxySelector.html" target="_blank" rel="external">ProxySelector</a> is in use), and which version of TLS to negotiate (for HTTPS connections).</p>
-<p>线路提供动态信息需要实时连接到网络服务器。这是尝试特定的IP地址(如一个DNS访问被发现),准确的使用代理服务器(如果使用<a href="http://developer.android.com/reference/java/net/ProxySelector.html" target="_blank" rel="external">ProxySelector</a>),和哪个版本的TLS交涉(HTTPS连接)。</p>
-<p>There may be many routes for a single address. For example, a webserver that is hosted in multiple datacenters may yield multiple IP addresses in its DNS response.</p>
-<p>可能有很多路线共用一个地址。例如,一个网络服务器驻留在多个数据中心可能在DNS的回应中产生多个IP地址。</p>
-<h2 id="Connections-连接"><a href="#Connections-连接" class="headerlink" title="Connections 连接"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Connection.html" target="_blank" rel="external">Connections 连接</a></h2><p>When you request a URL with OkHttp, here’s what it does:</p>
-<ol>
-<li>It uses the URL and configured OkHttpClient to create an <strong>address</strong>. This address specifies how we’ll connect to the webserver.</li>
-<li>It attempts to retrieve a connection with that address from the <strong>connection pool</strong>.</li>
-<li>If it doesn’t find a connection in the pool, it selects a <strong>route</strong> to attempt. This usually means making a DNS request to get the server’s IP addresses. It then selects a TLS version and proxy server if necessary.</li>
-<li>If it’s a new route, it connects by building either a direct socket connection, a TLS tunnel (for HTTPS over an HTTP proxy), or a direct TLS connection. It does TLS handshakes as necessary.</li>
-<li>It sends the HTTP request and reads the response.</li>
-</ol>
-<p>当你用OkHttp请求URL,它所做的:</p>
-<ol>
-<li>它使用URL和配置好的OkHttpClient创建一个<strong>地址</strong>.这个地址指定我们将如何连接到网络服务器.</li>
-<li>它试图从<strong>连接池</strong>中检索是否存在该地址的连接.</li>
-<li>如果在连接池中没有找到一个连接,它尝试选择一条路线.这通常意味着一个DNS请求服务器的IP地址.然后选择一个TLS版本和在必要时使用代理服务器.</li>
-<li>如果这是一个新的线路,它通过建立一个直接的socket连接,TLS隧道(HTTP代理上的HTTPS),或直接TLS连接.必要时与TLS握手。</li>
-<li>它发送HTTP请求并读取响应.</li>
-</ol>
-<p>If there’s a problem with the connection, OkHttp will select another route and try again. This allows OkHttp to recover when a subset of a server’s addresses are unreachable. It’s also useful when a pooled connection is stale or if the attempted TLS version is unsupported.</p>
-<p>如果连接发生问题,OkHttp会选择另一条路线,并再试一次.这允许OkHttp当服务器地址的子设备无法访问时重新访问.在某个依赖的连接失效或者尝试TLS版本是不支持的时候同样非常有用.</p>
-<p>Once the response has been received, the connection will be returned to the pool so it can be reused for a future request. Connections are evicted from the pool after a period of inactivity.</p>
-<p>只有在接收到响应后,连接将会返回到连接池中,因此它可以被之后的请求重用.经过一段时间不活动的连接会被连接池清除.</p>
-<hr>
-<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
-<ol>
-<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
-<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
-<li>Okhttp-wiki 之 Connections 连接</li>
-<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
-<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
-<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
-</ol>
-
-      
-    </div>
-    
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
-	</div>
-
-
-      
-      <div class="clearfix"></div>
-    </div>
-    
-  </div>
-  
-</article>
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Calls" class="article article-type-post" itemscope itemprop="blogPost">
-  
-    <div class="article-meta">
-      <a href="/2016/03/11/Calls/" class="article-date">
-  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
-</a>
-    </div>
-  
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/03/11/Calls/">Okhttp-wiki 之 Calls 调用</a>
-    </h1>
-  
-
-      </header>
-      
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Okhttp-wiki-之-Calls-调用"><a href="#Okhttp-wiki-之-Calls-调用" class="headerlink" title="Okhttp-wiki 之 Calls 调用"></a>Okhttp-wiki 之 Calls 调用</h1><p>The HTTP client’s job is to accept your request and produce its response. This is simple in theory but it gets tricky in practice.</p>
-<p>HTTP客户端的工作是接受你的请求,并生成其响应。说起来简单但做起来复杂.<br>\&lt;!–more–></p>
-<h2 id="Requests-请求"><a href="#Requests-请求" class="headerlink" title="Requests 请求"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Request.html" target="_blank" rel="external">Requests 请求</a></h2><p>Each HTTP request contains a URL, a method (like GET or POST), and a list of headers. Requests may also contain a body: a data stream of a specific content type.</p>
-<p>每个HTTP请求包含一个URL、一个方法(如GET或POST),同时包含头信息的列表。请求也可能包含一个实体:具体类型内容的数据流。</p>
-<h2 id="Responses-响应"><a href="#Responses-响应" class="headerlink" title="Responses 响应"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Response.html" target="_blank" rel="external">Responses 响应</a></h2><p>The response answers the request with a code (like 200 for success or 404 for not found), headers, and its own optional body.</p>
-<p>根据请求返回的响应码(成功的200或没有找到内容的404),头信息,和可选的实体。</p>
-<h3 id="Rewriting-Requests-重写请求"><a href="#Rewriting-Requests-重写请求" class="headerlink" title="Rewriting Requests 重写请求"></a>Rewriting Requests 重写请求</h3><p>When you provide OkHttp with an HTTP request, you’re describing the request at a high-level: “fetch me this URL with these headers.” For correctness and efficiency, OkHttp rewrites your request before transmitting it.</p>
-<p>为OkHttp提供一个HTTP请求时,你描述一个高水平的请求给okhttp:”拿到包含这些头信息的请求”.为了确保正确性和效率,在传输之前OkHttp会重写你的请求。</p>
-<p>OkHttp may add headers that are absent from the original request, including Content-Length, Transfer-Encoding, User-Agent, Host, Connection, and Content-Type. It will add an Accept-Encoding header for transparent response compression unless the header is already present. If you’ve got cookies, OkHttp will add a Cookie header with them.</p>
-<p>OkHttp可能为原始请求添加缺少的头信息,包括内容长度,传输编码,用户代理、主机,连接,和内容类型。它将添加一个明确的编码头信息来压缩响应,除非该头信息已经存在.如果你有cookies,OkHttp将添加一个cookie头信息在里面。</p>
-<p>Some requests will have a cached response. When this cached response isn’t fresh, OkHttp can do a conditional GET to download an updated response if it’s newer than what’s cached. This requires headers like If-Modified-Since and If-None-Match to be added.</p>
-<p>一些请求会有响应的缓存。当这个缓存的响应不再是最新的,OkHttp做一个条件判断如果有新的响应则下载最新的响应.这种需求头信息被添加就像If-Modified-Since 和 If-None-Match模式。(如果没有缓存则匹配最新的并缓存下来;如果有缓存则看看是否是最新的,如果是最新的则直接返回缓存,否则请求最新的并更新缓存.)</p>
-<h3 id="Rewriting-Responses-重写响应"><a href="#Rewriting-Responses-重写响应" class="headerlink" title="Rewriting Responses 重写响应"></a>Rewriting Responses 重写响应</h3><p>If transparent compression was used, OkHttp will drop the corresponding response headers Content-Encoding and Content-Length because they don’t apply to the decompressed response body.</p>
-<p>如果使用了明确的压缩,OkHttp将删除对应的响应头信息:内容编码和内容长度,因为他们并不适用于实体解压的响应实体。</p>
-<p>If a conditional GET was successful, responses from the network and cache are merged as directed by the spec.</p>
-<p>如果GET请求成功,响应和缓存将会按照规范来合并.</p>
-<h3 id="Follow-up-Requests-跟进请求"><a href="#Follow-up-Requests-跟进请求" class="headerlink" title="Follow-up Requests 跟进请求"></a>Follow-up Requests 跟进请求</h3><p>When your requested URL has moved, the webserver will return a response code like 302 to indicate the document’s new URL. OkHttp will follow the redirect to retrieve a final response.</p>
-<p>当你通过URL请求时,网络服务器将返回一个响应代码,比如说302来指出新的URL路径.OkHttp会重定向直到检索到最终的响应。</p>
-<p>If the response issues an authorization challenge, OkHttp will ask the <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Authenticator.html" target="_blank" rel="external">Authenticator</a> (if one is configured) to satisfy the challenge. If the authenticator supplies a credential, the request is retried with that credential included.</p>
-<p>如果响应需要授权验证,OkHttp将访问<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Authenticator.html" target="_blank" rel="external">Authenticator</a>(如果已经配置过一个)来满足这个验证。如果认证器提供一个凭证,请求将会带上凭证重新访问。</p>
-<h3 id="Retrying-Requests-请求重试"><a href="#Retrying-Requests-请求重试" class="headerlink" title="Retrying Requests 请求重试"></a>Retrying Requests 请求重试</h3><p>Sometimes connections fail: either a pooled connection was stale and disconnected, or the webserver itself couldn’t be reached. OkHttp will retry the request with a different route if one is available.</p>
-<p>有时候会连接失败:某个连接池过时了或者断开连接,或者该网络服务器本身无法被访问。OkHttp将通过一个不同的线路重试请求。</p>
-<h2 id="Calls-调用"><a href="#Calls-调用" class="headerlink" title="Calls 调用"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Call.html" target="_blank" rel="external">Calls 调用</a></h2><p>With rewrites, redirects, follow-ups and retries, your simple request may yield many requests and responses. OkHttp uses Call to model the task of satisfying your request through however many intermediate requests and responses are necessary. Typically this isn’t many! But it’s comforting to know that your code will continue to work if your URLs are redirected or if you failover to an alternate IP address.</p>
-<p>伴随着重写,重定向,跟进和重试,你简单的请求可能产生许多请求和响应。OkHttp将调用一系列任务直到满足你的需求,然而许多中间的任务请求和响应是必要的。通常这不是很多!但欣慰的是您的代码将继续执行如果你的url重定向或故障转移到另一个IP地址。</p>
-<p>Calls are executed in one of two ways:</p>
-<ul>
-<li>Synchronous: your thread blocks until the response is readable.</li>
-<li>Asynchronous: you enqueue the request on any thread, and get called back on another thread when the response is readable.</li>
-</ul>
-<p>调用将会执行以下两种方式中的一种:</p>
-<ul>
-<li>同步的:你的线程被锁住直到响应返回.</li>
-<li>异步的:你在任何线程安排请求,在另一个线程获得响应回调。</li>
-</ul>
-<p>Calls can be canceled from any thread. This will fail the call if it hasn’t yet completed! Code that is writing the request body or reading the response body will suffer an IOException when its call is canceled.</p>
-<p>从任何线程都可以取消调用。如果调用还没有完成,这将使得调用失败!当调用取消时代码中对请求实体或响应实体做读写操作会得到一个IOException。</p>
-<h3 id="Dispatch-派遣"><a href="#Dispatch-派遣" class="headerlink" title="Dispatch 派遣"></a>Dispatch 派遣</h3><p>For synchronous calls, you bring your own thread and are responsible for managing how many simultaneous requests you make. Too many simultaneous connections wastes resources; too few harms latency.</p>
-<p>对于同步调用,你用自己的线程负责管理有多少并发请求。太多的并发连接浪费资源;特别是导致延迟。</p>
-<p>For asynchronous calls, <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Dispatcher.html" target="_blank" rel="external">Dispatcher</a> implements policy for maximum simultaneous requests. You can set maximums per-webserver (default is 5), and overall (default is 64).</p>
-<p>对于异步调用,<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Dispatcher.html" target="_blank" rel="external">Dispatcher</a>实现最多的并发请求政策。你可以设置每个主机最大请求数(默认为5),和最大并发请求数(默认是64)。</p>
-<hr>
-<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
-<ol>
-<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
-<li>Okhttp-wiki 之 Calls 调用</li>
-<li><a href="http://www.jianshu.com/p/3d9b5de2bb1b" target="_blank" rel="external">Okhttp-wiki 之 Connections 连接</a></li>
-<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
-<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
+<li>Okhttp-wiki 之 Interceptors 拦截器</li>
 <li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
 </ol>
 
@@ -1497,6 +1230,252 @@ public SSLContext sslContextForTrustedCertificates(InputStream in) {
 <li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
 <li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
 <li>Okhttp-wiki 之 HTTPS</li>
+</ol>
+
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
+	</div>
+
+
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-OkHttp" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/11/OkHttp/" class="article-date">
+  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/11/OkHttp/">Okhttp</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Okhttp"><a href="#Okhttp" class="headerlink" title="Okhttp"></a>Okhttp</h1><h2 id="An-HTTP-amp-HTTP-2-client-for-Android-and-Java-applications-用于Android和Java应用程序HTTP和HTTP-2的客户端"><a href="#An-HTTP-amp-HTTP-2-client-for-Android-and-Java-applications-用于Android和Java应用程序HTTP和HTTP-2的客户端" class="headerlink" title="An HTTP &amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端"></a>An HTTP &amp; HTTP/2 client for Android and Java applications 用于Android和Java应用程序HTTP和HTTP/2的客户端</h2><h3 id="Overview-描述"><a href="#Overview-描述" class="headerlink" title="Overview 描述"></a>Overview 描述</h3><p>HTTP is the way modern applications network. It’s how we exchange data &amp; media. Doing HTTP efficiently makes your stuff load faster and saves bandwidth.</p>
+<p>HTTP是拉近网络应用程序的方式.这是我们如何交换数据和媒体.使用HTTP有效地使你的东西加载更快,节省带宽.<br>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a  href="/2016/03/11/OkHttp/#more">more >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Calls" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/11/Calls/" class="article-date">
+  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/11/Calls/">Okhttp-wiki 之 Calls 调用</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Okhttp-wiki-之-Calls-调用"><a href="#Okhttp-wiki-之-Calls-调用" class="headerlink" title="Okhttp-wiki 之 Calls 调用"></a>Okhttp-wiki 之 Calls 调用</h1><p>The HTTP client’s job is to accept your request and produce its response. This is simple in theory but it gets tricky in practice.</p>
+<p>HTTP客户端的工作是接受你的请求,并生成其响应。说起来简单但做起来复杂.<br>
+      
+    </div>
+    
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Okhttp/">Okhttp</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Okhttp/">Okhttp</a>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a  href="/2016/03/11/Calls/#more">more >></a>
+        </p>
+      
+      <div class="clearfix"></div>
+    </div>
+    
+  </div>
+  
+</article>
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Connections" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2016/03/11/Connections/" class="article-date">
+  	<time datetime="2016-03-11T02:51:52.000Z" itemprop="datePublished">2016-03-11</time>
+</a>
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/03/11/Connections/">Okhttp-wiki 之 Connections 连接</a>
+    </h1>
+  
+
+      </header>
+      
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Okhttp-wiki-之-Connections-连接"><a href="#Okhttp-wiki-之-Connections-连接" class="headerlink" title="Okhttp-wiki 之 Connections 连接"></a>Okhttp-wiki 之 Connections 连接</h1><p>Although you provide only the URL, OkHttp plans its connection to your webserver using three types: URL, Address, and Route.</p>
+<p>虽然你只需要提供URL,但OkHttp计划它连接到您的网络服务器需要使用三种类型:URL,地址和路线.</p>
+<h2 id="URLs"><a href="#URLs" class="headerlink" title="URLs"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/HttpUrl.html" target="_blank" rel="external">URLs</a></h2><p>URLs (like <a href="https://github.com/square/okhttp" target="_blank" rel="external">https://github.com/square/okhttp</a>) are fundamental to HTTP and the Internet. In addition to being a universal, decentralized naming scheme for everything on the web, they also specify how to access web resources.</p>
+<p>URLs(例如<a href="https://github.com/square/okhttp)是HTTP和互联网的基础。除了网络所有事物普遍的、分散的命名方案之外,他们还指定如何访问网络资源" target="_blank" rel="external">https://github.com/square/okhttp)是HTTP和互联网的基础。除了网络所有事物普遍的、分散的命名方案之外,他们还指定如何访问网络资源</a>.</p>
+<p>URLs are abstract:</p>
+<ul>
+<li>They specify that the call may be plaintext (http) or encrypted (https), but not which cryptographic algorithms should be used. Nor do they specify how to verify the peer’s certificates (the <a href="http://developer.android.com/reference/javax/net/ssl/HostnameVerifier.html" target="_blank" rel="external">HostnameVerifier</a>) or which certificates can be trusted (the <a href="http://developer.android.com/reference/org/apache/http/conn/ssl/SSLSocketFactory.html" target="_blank" rel="external">SSLSocketFactory</a>).</li>
+<li>They don’t specify whether a specific proxy server should be used or how to authenticate with that proxy server.</li>
+</ul>
+<p>URLs 是抽象的:</p>
+<ul>
+<li>他们指定的调用可能是明文的(http)或加密的(https),但不使用任何加密算法。他们也不指定如何验证对等的证书(<a href="http://developer.android.com/reference/javax/net/ssl/HostnameVerifier.html" target="_blank" rel="external">HostnameVerifier</a>)或哪个证书可以被信任(<a href="http://developer.android.com/reference/org/apache/http/conn/ssl/SSLSocketFactory.html" target="_blank" rel="external">SSLSocketFactory</a>)。</li>
+<li>他们没有指定是否应该使用一个特定的代理服务器或使用该代理服务器进行身份验证。</li>
+</ul>
+<p>They’re also concrete: each URL identifies a specific path (like /square/okhttp) and query (like ?q=sharks&amp;lang=en). Each webserver hosts many URLs.</p>
+<p>他们也很具体:每个URL标识一个特定的路径(比如/square/okhttp)和询问(? q = sharks&amp;lang = en).每一个网络服务器主导很多url.</p>
+<h2 id="Addresses-地址"><a href="#Addresses-地址" class="headerlink" title="Addresses 地址"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Address.html" target="_blank" rel="external">Addresses 地址</a></h2><p>Addresses specify a webserver (like github.com) and all of the <strong>static</strong> configuration necessary to connect to that server: the port number, HTTPS settings, and preferred network protocols (like HTTP/2 or SPDY).</p>
+<p>地址指定一个网络服务器(比如github.com)和连接到服务器必要的所有的<strong>静态</strong>配置:端口号,HTTPS设置和首选网络协议(如HTTP/2 or SPDY)。</p>
+<p>URLs that share the same address may also share the same underlying TCP socket connection. Sharing a connection has substantial performance benefits: lower latency, higher throughput (due to <a href="http://www.igvita.com/2011/10/20/faster-web-vs-tcp-slow-start/" target="_blank" rel="external">TCP slow start</a>) and conserved battery. OkHttp uses a <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionPool.html" target="_blank" rel="external">ConnectionPool</a> that automatically reuses HTTP/1.x connections and multiplexes HTTP/2 and SPDY connections.</p>
+<p>URLs共享相同的地址也可以共享相同的底层TCP socket连接。共享一个连接有巨大的性能优势:低延迟、高吞吐量(由于<a href="http://www.igvita.com/2011/10/20/faster-web-vs-tcp-slow-start/" target="_blank" rel="external">TCP慢启动</a>)和保守的电量。OkHttp使用<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/ConnectionPool.html" target="_blank" rel="external">连接池</a>自动重用HTTP/1.x连接和多样的HTTP/2 and SPDY 连接.</p>
+<p>In OkHttp some fields of the address come from the URL (scheme, hostname, port) and the rest come from the <a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/OkHttpClient.html" target="_blank" rel="external">OkHttpClient</a>.</p>
+<p>在OkHttp中一些地址的字段来自URL(计划、主机名、端口),其余来自<a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/OkHttpClient.html" target="_blank" rel="external">OkHttpClient</a>.</p>
+<h2 id="Routes-线路"><a href="#Routes-线路" class="headerlink" title="Routes 线路"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Route.html" target="_blank" rel="external">Routes 线路</a></h2><p>Routes supply the <strong>dynamic</strong> information necessary to actually connect to a webserver. This is the specific IP address to attempt (as discovered by a DNS query), the exact proxy server to use (if a <a href="http://developer.android.com/reference/java/net/ProxySelector.html" target="_blank" rel="external">ProxySelector</a> is in use), and which version of TLS to negotiate (for HTTPS connections).</p>
+<p>线路提供动态信息需要实时连接到网络服务器。这是尝试特定的IP地址(如一个DNS访问被发现),准确的使用代理服务器(如果使用<a href="http://developer.android.com/reference/java/net/ProxySelector.html" target="_blank" rel="external">ProxySelector</a>),和哪个版本的TLS交涉(HTTPS连接)。</p>
+<p>There may be many routes for a single address. For example, a webserver that is hosted in multiple datacenters may yield multiple IP addresses in its DNS response.</p>
+<p>可能有很多路线共用一个地址。例如,一个网络服务器驻留在多个数据中心可能在DNS的回应中产生多个IP地址。</p>
+<h2 id="Connections-连接"><a href="#Connections-连接" class="headerlink" title="Connections 连接"></a><a href="http://square.github.io/okhttp/3.x/okhttp/okhttp3/Connection.html" target="_blank" rel="external">Connections 连接</a></h2><p>When you request a URL with OkHttp, here’s what it does:</p>
+<ol>
+<li>It uses the URL and configured OkHttpClient to create an <strong>address</strong>. This address specifies how we’ll connect to the webserver.</li>
+<li>It attempts to retrieve a connection with that address from the <strong>connection pool</strong>.</li>
+<li>If it doesn’t find a connection in the pool, it selects a <strong>route</strong> to attempt. This usually means making a DNS request to get the server’s IP addresses. It then selects a TLS version and proxy server if necessary.</li>
+<li>If it’s a new route, it connects by building either a direct socket connection, a TLS tunnel (for HTTPS over an HTTP proxy), or a direct TLS connection. It does TLS handshakes as necessary.</li>
+<li>It sends the HTTP request and reads the response.</li>
+</ol>
+<p>当你用OkHttp请求URL,它所做的:</p>
+<ol>
+<li>它使用URL和配置好的OkHttpClient创建一个<strong>地址</strong>.这个地址指定我们将如何连接到网络服务器.</li>
+<li>它试图从<strong>连接池</strong>中检索是否存在该地址的连接.</li>
+<li>如果在连接池中没有找到一个连接,它尝试选择一条路线.这通常意味着一个DNS请求服务器的IP地址.然后选择一个TLS版本和在必要时使用代理服务器.</li>
+<li>如果这是一个新的线路,它通过建立一个直接的socket连接,TLS隧道(HTTP代理上的HTTPS),或直接TLS连接.必要时与TLS握手。</li>
+<li>它发送HTTP请求并读取响应.</li>
+</ol>
+<p>If there’s a problem with the connection, OkHttp will select another route and try again. This allows OkHttp to recover when a subset of a server’s addresses are unreachable. It’s also useful when a pooled connection is stale or if the attempted TLS version is unsupported.</p>
+<p>如果连接发生问题,OkHttp会选择另一条路线,并再试一次.这允许OkHttp当服务器地址的子设备无法访问时重新访问.在某个依赖的连接失效或者尝试TLS版本是不支持的时候同样非常有用.</p>
+<p>Once the response has been received, the connection will be returned to the pool so it can be reused for a future request. Connections are evicted from the pool after a period of inactivity.</p>
+<p>只有在接收到响应后,连接将会返回到连接池中,因此它可以被之后的请求重用.经过一段时间不活动的连接会被连接池清除.</p>
+<hr>
+<p><strong>对OkHttp感兴趣的朋友可以看一看Okhttp-wiki系列,可以帮助你理解Okhttp的使用方法及原理:</strong></p>
+<ol>
+<li><a href="http://www.jianshu.com/p/d2667e156097" target="_blank" rel="external">Okhttp-wiki 之 Home 主页</a></li>
+<li><a href="http://www.jianshu.com/p/3c0b23bfcbc5" target="_blank" rel="external">Okhttp-wiki 之 Calls 调用</a></li>
+<li>Okhttp-wiki 之 Connections 连接</li>
+<li><a href="http://www.jianshu.com/p/5c669861a6b1" target="_blank" rel="external">Okhttp-wiki 之 Recipes 秘诀(食谱)</a></li>
+<li><a href="http://www.jianshu.com/p/2710ed1e6b48" target="_blank" rel="external">Okhttp-wiki 之 Interceptors 拦截器</a></li>
+<li><a href="http://www.jianshu.com/p/7b46812ff333" target="_blank" rel="external">Okhttp-wiki 之 HTTPS</a></li>
 </ol>
 
       

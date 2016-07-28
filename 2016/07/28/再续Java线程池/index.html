@@ -10,9 +10,7 @@
 本文引领大家更深层次的理解线程池的工作原理
 大家可以先看看前一篇文章 初识 Java 线程池
 
-相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?
-上一篇文章提到Java通过Executors来创建四种线程池, 进入源码我们会发现, 真正的线程池的实现为 ThreadPoolExecutor .
-ThreadPoolEx">
+相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?">
 <meta property="og:type" content="article">
 <meta property="og:title" content="再续 Java 线程池">
 <meta property="og:url" content="http://yoursite.com/2016/07/28/再续Java线程池/index.html">
@@ -21,19 +19,15 @@ ThreadPoolEx">
 本文引领大家更深层次的理解线程池的工作原理
 大家可以先看看前一篇文章 初识 Java 线程池
 
-相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?
-上一篇文章提到Java通过Executors来创建四种线程池, 进入源码我们会发现, 真正的线程池的实现为 ThreadPoolExecutor .
-ThreadPoolEx">
-<meta property="og:updated_time" content="2016-07-28T07:21:03.000Z">
+相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?">
+<meta property="og:updated_time" content="2016-07-28T10:02:10.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="再续 Java 线程池">
 <meta name="twitter:description" content="再续 Java 线程池
 本文引领大家更深层次的理解线程池的工作原理
 大家可以先看看前一篇文章 初识 Java 线程池
 
-相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?
-上一篇文章提到Java通过Executors来创建四种线程池, 进入源码我们会发现, 真正的线程池的实现为 ThreadPoolExecutor .
-ThreadPoolEx">
+相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?">
   
     <link rel="alternative" href="/atom.xml" title="汉之风云" type="application/atom+xml">
   
@@ -242,8 +236,7 @@ ThreadPoolEx">
 <p>本文引领大家更深层次的理解线程池的工作原理</p>
 <p>大家可以先看看前一篇文章 <a href="http://www.hanzhifengyun.com/2016/02/23/%E5%88%9D%E5%A7%8BJava%E7%BA%BF%E7%A8%8B%E6%B1%A0" target="_blank" rel="external"><strong>初识 Java 线程池</strong></a></p>
 </blockquote>
-<p>相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?</p>
-<p>上一篇文章提到Java通过Executors来创建四种线程池, 进入源码我们会发现, 真正的线程池的实现为 <code>ThreadPoolExecutor</code> .</p>
+<p>相信看过上一篇的朋友们都对常用的四种线程池有基础的概念和它们带来的好处了.那么它们的真正是怎么实现的呢?<br><a id="more"></a><br>上一篇文章提到Java通过Executors来创建四种线程池, 进入源码我们会发现, 真正的线程池的实现为 <code>ThreadPoolExecutor</code> .</p>
 <h2 id="ThreadPoolExecutor"><a href="#ThreadPoolExecutor" class="headerlink" title="ThreadPoolExecutor"></a>ThreadPoolExecutor</h2><pre><code>public ThreadPoolExecutor(int corePoolSize,
   int maximumPoolSize,
   long keepAliveTime,
