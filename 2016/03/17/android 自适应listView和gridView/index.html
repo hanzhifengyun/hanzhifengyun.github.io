@@ -4,18 +4,21 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>categories | 汉之风云</title>
+  <title>ScrollView嵌套listView/gridView的坑 | 汉之风云</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="活着 开心就好">
-<meta property="og:type" content="website">
-<meta property="og:title" content="categories">
-<meta property="og:url" content="http://yoursite.com/categories/index.html">
+  <meta name="description" content="问题: 为什么scrollView中的listView/gridView只显示一行?
+原因:由于listView/gridView在scrollView中无法正确计算它的大小, 故只显示一行.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ScrollView嵌套listView/gridView的坑">
+<meta property="og:url" content="http://yoursite.com/2016/03/17/android 自适应listView和gridView/index.html">
 <meta property="og:site_name" content="汉之风云">
-<meta property="og:description" content="活着 开心就好">
-<meta property="og:updated_time" content="2016-07-27T07:49:43.000Z">
+<meta property="og:description" content="问题: 为什么scrollView中的listView/gridView只显示一行?
+原因:由于listView/gridView在scrollView中无法正确计算它的大小, 故只显示一行.">
+<meta property="og:updated_time" content="2016-07-29T06:16:33.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="categories">
-<meta name="twitter:description" content="活着 开心就好">
+<meta name="twitter:title" content="ScrollView嵌套listView/gridView的坑">
+<meta name="twitter:description" content="问题: 为什么scrollView中的listView/gridView只显示一行?
+原因:由于listView/gridView在scrollView中无法正确计算它的大小, 故只显示一行.">
   
     <link rel="alternative" href="/atom.xml" title="汉之风云" type="application/atom+xml">
   
@@ -179,11 +182,11 @@
 	</div>
 </nav>
 
-      <div class="body-wrap"><article id="page-undefined" class="article article-type-page" itemscope itemprop="blogPost">
+      <div class="body-wrap"><article id="post-android 自适应listView和gridView" class="article article-type-post" itemscope itemprop="blogPost">
   
     <div class="article-meta">
-      <a href="/categories/index.html" class="article-date">
-  	<time datetime="2016-07-27T07:48:38.000Z" itemprop="datePublished">2016-07-27</time>
+      <a href="/2016/03/17/android 自适应listView和gridView/" class="article-date">
+  	<time datetime="2016-03-17T14:41:30.000Z" itemprop="datePublished">2016-03-17</time>
 </a>
     </div>
   
@@ -196,7 +199,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      categories
+      ScrollView嵌套listView/gridView的坑
     </h1>
   
 
@@ -204,7 +207,15 @@
       
       <div class="article-info article-info-post">
         
+	<div class="article-tag tagcloud">
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
         
+	<div class="article-category tagcloud">
+	<a class="article-category-link" href="/categories/Android/">Android</a>
+	</div>
+
 
         <div class="clearfix"></div>
       </div>
@@ -212,13 +223,119 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h2 id="问题-为什么scrollView中的listView-gridView只显示一行"><a href="#问题-为什么scrollView中的listView-gridView只显示一行" class="headerlink" title="问题: 为什么scrollView中的listView/gridView只显示一行?"></a>问题: 为什么scrollView中的listView/gridView只显示一行?</h2><blockquote>
+<p><strong>原因:由于listView/gridView在scrollView中无法正确计算它的大小, 故只显示一行.</strong></p>
+</blockquote>
+<a id="more"></a>
+<h3 id="最佳解决方案"><a href="#最佳解决方案" class="headerlink" title="最佳解决方案:"></a>最佳解决方案:</h3><p>  重写ListView, 覆盖onMeasure()方法:设置让listView能有多高就多高.</p>
+<pre><code>public class WrapListView extends ListView{
+
+
+    public WrapListView(Context context) {
+        super(context);
+    }
+
+    public WrapListView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public WrapListView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+
+        int expandSpec = MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE &gt;&gt; 2,
+                MeasureSpec.AT_MOST);
+        super.onMeasure(widthMeasureSpec, expandSpec);
+    }
+}
+</code></pre><p>  gridView与listView相同:</p>
+<pre><code>public class WrapGridView extends GridView{
+
+
+    public WrapGridView(Context context) {
+        super(context);
+    }
+
+    public WrapGridView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public WrapGridView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int expandSpec = MeasureSpec.makeMeasureSpec(Integer.MAX_VALUE &gt;&gt; 2,
+                MeasureSpec.AT_MOST);
+        super.onMeasure(widthMeasureSpec, expandSpec);
+    }
+}
+</code></pre><h3 id="不重写ListView的方案"><a href="#不重写ListView的方案" class="headerlink" title="不重写ListView的方案"></a>不重写ListView的方案</h3><pre><code>private void setListViewHeight(ListView listView) {
+
+    ListAdapter listAdapter = listView.getAdapter();
+
+    if (listAdapter == null) {  
+            return;
+    }
+
+    int totalHeight = 0;
+
+    for (int i = 0; i &lt; listAdapter.getCount(); i++) {
+
+            View listItem = listAdapter.getView(i, null, listView);
+
+            listItem.measure(0, 0);
+
+            totalHeight += listItem.getMeasuredHeight();
+
+    }
+
+
+
+    ViewGroup.LayoutParams params = listView.getLayoutParams();
+
+    params.height = totalHeight
+
+                    + (listView.getDividerHeight() * (listAdapter.getCount() - 1));
+
+    listView.setLayoutParams(params);
+
+}
+</code></pre><blockquote>
+<p>建议使用最佳方案, 只需在布局文件中将对应的listView标签替换即可</p>
+</blockquote>
+
       
     </div>
     
   </div>
   
     
+<nav id="article-nav">
+  
+    <a href="/2016/03/17/用Shape实现圆角和局部圆角/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption"><</strong>
+      <div class="article-nav-title">
+        
+          用Shape实现圆角和局部圆角
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/03/11/Interceptors/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Okhttp-wiki 之 Interceptors 拦截器</div>
+      <strong class="article-nav-caption">></strong>
+    </a>
+  
+</nav>
+
   
 </article>
 
@@ -244,6 +361,26 @@
 
 
 
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="android 自适应listView和gridView" data-title="ScrollView嵌套listView/gridView的坑" data-url="http://yoursite.com/2016/03/17/android 自适应listView和gridView/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
 
 
@@ -272,7 +409,7 @@
 		mathjax: true,
 		animate: true,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
